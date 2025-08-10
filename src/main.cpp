@@ -1,4 +1,3 @@
-#include <string.h>
 #include <iostream>
 #include <wsjcpp_sql_builder.h>
 

@@ -19,23 +19,25 @@ or include this files:
 
 Example main func:
 ```
+#include <iostream>
 #include <wsjcpp_sql_builder.h>
 
 int main(int argc, const char* argv[]) {
-    // init employees
-    bool bSilent = false;
-    WsjcppEmployeesInit empls({}, bSilent);
-    if (!empls.inited) {
-        WsjcppLog::err(TAG, "Could not init employees");
+    WsjcppSqlBuilderInsert sql("TABLE_NAME");
+    sql.add("COL1", "val1"); // will be escaped
+    sql.add("COL2", 1);
+    // sql.add("COL3", 1.1);
+    if (!sql.isValid()) {
+        std::cerr << "Something wrong with query: " << sql.getErrorMessage() << std::endl;
         return -1;
     }
+    std::cout << sql.getTextQuery() << std::endl;
     return 0;
 }
 ```
 
 Example output:
 ```
-% ./wsjcpp-employees
-2020-03-22 11:32:31.750, 0x0x110c21dc0 [INFO] WJSCppEmployRuntimeGlobalCache: init
-2020-03-22 11:32:31.750, 0x0x110c21dc0 [OK] Employees_init: Init WJSCppEmployRuntimeGlobalCache ... OK
+$ ./wsjcpp-sql-builder
+INSERT INTO TABLE_NAME(COL1, COL2) VALUES ('val1', 1);
 ```
