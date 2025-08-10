@@ -10,8 +10,8 @@
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in
+ *all copies or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -28,9 +28,8 @@
 // ---------------------------------------------------------------------
 // WsjcppSqlBuilder
 
-WsjcppSqlBuilder::WsjcppSqlBuilder(
-  WsjcppSqlBuilderType nSqlType, const std::string &sSqlTable
-) {
+WsjcppSqlBuilder::WsjcppSqlBuilder(WsjcppSqlBuilderType nSqlType,
+                                   const std::string &sSqlTable) {
   m_nSqlType = nSqlType;
   m_sSqlTable = sSqlTable;
   m_bValid = true;
@@ -59,7 +58,8 @@ bool WsjcppSqlBuilder::sel(const std::string &sColumnName) {
   return true;
 }
 
-bool WsjcppSqlBuilder::add(const std::string &sColumnName, const std::string &sValue) {
+bool WsjcppSqlBuilder::add(const std::string &sColumnName,
+                           const std::string &sValue) {
   if (!checkName(sColumnName)) {
     return false;
   }
@@ -87,8 +87,8 @@ bool WsjcppSqlBuilder::add(const std::string &sColumnName, const std::string &sV
   //   /* Make the replacement. */
   //   str.replace(index, 3, "def");
 
-  //   /* Advance index forward so the next iteration doesn't pick it up as well. */
-  //   index += 3;
+  //   /* Advance index forward so the next iteration doesn't pick it up as
+  //   well. */ index += 3;
   // }
   return true;
 }
@@ -129,7 +129,8 @@ bool WsjcppSqlBuilder::add(const std::string &sColumnName, long nValue) {
   return true;
 }
 
-bool WsjcppSqlBuilder::where(const std::string &sColumnName, const std::string &sValue) {
+bool WsjcppSqlBuilder::where(const std::string &sColumnName,
+                             const std::string &sValue) {
   if (!checkName(sColumnName)) {
     return false;
   }
@@ -183,18 +184,22 @@ std::string WsjcppSqlBuilder::getTextQuery() {
   if (m_nSqlType == WsjcppSqlBuilderType::SELECT) {
     // TODO refactor this to vector and join
     sSqlQuery = m_sSqlQuery0;
-    if (size0 > 2 && m_sSqlQuery0[size0 - 1] == ' ' && m_sSqlQuery0[size0 - 2] == ',') {
+    if (size0 > 2 && m_sSqlQuery0[size0 - 1] == ' ' &&
+        m_sSqlQuery0[size0 - 2] == ',') {
       sSqlQuery += m_sSqlQuery0.substr(0, size0 - 2);
     }
     sSqlQuery += m_sSqlQuery1;
-    if (size2 > 2 && m_sSqlQuery2[size2 - 1] == ' ' && m_sSqlQuery2[size2 - 2] == ',') {
+    if (size2 > 2 && m_sSqlQuery2[size2 - 1] == ' ' &&
+        m_sSqlQuery2[size2 - 2] == ',') {
       sSqlQuery += m_sSqlQuery2.substr(0, size2 - 2);
     }
   } else if (m_nSqlType == WsjcppSqlBuilderType::INSERT) {
-    if (size0 > 2 && m_sSqlQuery0[size0 - 1] == ' ' && m_sSqlQuery0[size0 - 2] == ',') {
+    if (size0 > 2 && m_sSqlQuery0[size0 - 1] == ' ' &&
+        m_sSqlQuery0[size0 - 2] == ',') {
       sSqlQuery += m_sSqlQuery0.substr(0, size0 - 2);
     }
-    if (size1 > 2 && m_sSqlQuery1[size1 - 1] == ' ' && m_sSqlQuery1[size1 - 2] == ',') {
+    if (size1 > 2 && m_sSqlQuery1[size1 - 1] == ' ' &&
+        m_sSqlQuery1[size1 - 2] == ',') {
       sSqlQuery += m_sSqlQuery1.substr(0, size1 - 2);
     }
     sSqlQuery += m_sSqlQuery2;
@@ -210,7 +215,8 @@ std::string WsjcppSqlBuilder::getErrorMessage() { return m_sErrorMessage; }
 
 bool WsjcppSqlBuilder::checkName(const std::string &sColumnName) {
   if (sColumnName.size() < 2) {
-    m_sErrorMessage = "Parameter '" + sColumnName + "' must more than 2 characters";
+    m_sErrorMessage =
+        "Parameter '" + sColumnName + "' must more than 2 characters";
     m_bValid = false;
     return false;
   }
@@ -264,16 +270,16 @@ std::string WsjcppSqlBuilder::prepareStringValue(const std::string &sValue) {
 // WsjcppSqlBuilderSelect
 
 WsjcppSqlBuilderSelect::WsjcppSqlBuilderSelect(const std::string &sSqlTable)
-  : WsjcppSqlBuilder(WsjcppSqlBuilderType::SELECT, sSqlTable) {}
+    : WsjcppSqlBuilder(WsjcppSqlBuilderType::SELECT, sSqlTable) {}
 
 // ---------------------------------------------------------------------
 // WsjcppSqlBuilderInsert
 
 WsjcppSqlBuilderInsert::WsjcppSqlBuilderInsert(const std::string &sSqlTable)
-  : WsjcppSqlBuilder(WsjcppSqlBuilderType::INSERT, sSqlTable) {}
+    : WsjcppSqlBuilder(WsjcppSqlBuilderType::INSERT, sSqlTable) {}
 
 // ---------------------------------------------------------------------
 // WsjcppSqlBuilderUpdate
 
 WsjcppSqlBuilderUpdate::WsjcppSqlBuilderUpdate(const std::string &sSqlTable)
-  : WsjcppSqlBuilder(WsjcppSqlBuilderType::UPDATE, sSqlTable) {}
+    : WsjcppSqlBuilder(WsjcppSqlBuilderType::UPDATE, sSqlTable) {}
