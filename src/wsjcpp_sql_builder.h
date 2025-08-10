@@ -26,6 +26,7 @@
 #pragma once
 
 #include <string>
+#include <map>
 
 enum class WsjcppSqlBuilderType { SELECT, INSERT, UPDATE };
 
@@ -56,6 +57,7 @@ private:
   std::string m_sSqlQuery0;
   std::string m_sSqlQuery1;
   std::string m_sSqlQuery2;
+  std::map<std::string, std::string> m_mapFields;
 };
 
 class WsjcppSqlBuilderSelect : public WsjcppSqlBuilder {

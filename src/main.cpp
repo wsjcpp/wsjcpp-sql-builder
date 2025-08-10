@@ -11,6 +11,11 @@ int main(int argc, const char* argv[]) {
         return -1;
     }
 
+    std::string expectedIns = "INSERT INTO TABLE_NAME(COL1, COL2) VALUES ('val1', 1);";
+    if (expectedIns != sql.getTextQuery()) {
+        std::cerr << "Expeceted sql: " << expectedIns << ", but got " << sql.getTextQuery() << std::endl;
+        return -1;
+    }
     std::cout << sql.getTextQuery() << std::endl;
 
     return 0;

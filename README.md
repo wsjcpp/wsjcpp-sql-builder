@@ -18,7 +18,7 @@ or include this files:
 ## How use this
 
 Example main func:
-```
+```cpp
 #include <iostream>
 #include <wsjcpp_sql_builder.h>
 
