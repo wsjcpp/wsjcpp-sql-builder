@@ -28,6 +28,34 @@
 #include "wsjcpp_sql_builder.h"
 
 // ---------------------------------------------------------------------
+// WsjcppSqlBuilder2
+
+
+WsjcppSqlBuilder2 &WsjcppSqlBuilder2::makeSelect(const std::string &sSqlTable) {
+  m_sTableName = sSqlTable;
+  m_nSqlType = WsjcppSqlBuilderType::SELECT;
+  return *this;
+}
+
+WsjcppSqlBuilder2 &WsjcppSqlBuilder2::makeInsert(const std::string &sSqlTable) {
+  m_sTableName = sSqlTable;
+  m_nSqlType = WsjcppSqlBuilderType::INSERT;
+  return *this;
+}
+
+WsjcppSqlBuilder2 &WsjcppSqlBuilder2::makeUpdate(const std::string &sSqlTable) {
+  m_sTableName = sSqlTable;
+  m_nSqlType = WsjcppSqlBuilderType::UPDATE;
+  return *this;
+}
+
+WsjcppSqlBuilder2 &WsjcppSqlBuilder2::makeDelete(const std::string &sSqlTable) {
+  m_sTableName = sSqlTable;
+  m_nSqlType = WsjcppSqlBuilderType::DELETE;
+  return *this;
+}
+
+// ---------------------------------------------------------------------
 // WsjcppSqlBuilder
 
 WsjcppSqlBuilder::WsjcppSqlBuilder(WsjcppSqlBuilderType nSqlType,

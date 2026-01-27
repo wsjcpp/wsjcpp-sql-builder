@@ -30,7 +30,19 @@
 #include <string>
 #include <map>
 
-enum class WsjcppSqlBuilderType { SELECT, INSERT, UPDATE };
+enum class WsjcppSqlBuilderType { SELECT, INSERT, UPDATE, DELETE };
+
+class WsjcppSqlBuilder2 {
+public:
+  WsjcppSqlBuilder2 &makeSelect(const std::string &sSqlTable);
+  WsjcppSqlBuilder2 &makeInsert(const std::string &sSqlTable);
+  WsjcppSqlBuilder2 &makeUpdate(const std::string &sSqlTable);
+  WsjcppSqlBuilder2 &makeDelete(const std::string &sSqlTable);
+
+private:
+  std::string m_sTableName;
+  WsjcppSqlBuilderType m_nSqlType;
+};
 
 class WsjcppSqlBuilder {
 public:
