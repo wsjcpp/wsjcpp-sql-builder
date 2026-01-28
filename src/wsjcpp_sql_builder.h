@@ -85,17 +85,19 @@ public:
 
 class WsjcppSqlBuilder2;
 
-// class WsjcppSqlWhere {
-// public:
-//   WsjcppSqlWhere();
+class WsjcppSqlWhere {
+public:
+  WsjcppSqlWhere();
+private:
 
-// };
+};
 
 
 class WsjcppSqlSelect : public WsjcppSqlQuery {
 public:
   WsjcppSqlSelect(const std::string &tableName, WsjcppSqlBuilder2 *builder);
-  WsjcppSqlSelect &colum(const std::string &col);
+  WsjcppSqlSelect &colum(const std::string &col, const std::string &col_as = "");
+
   // TODO where
   // TODO group by
   // TODO order by
@@ -106,6 +108,7 @@ private:
   std::string m_tableName;
   WsjcppSqlBuilder2 *m_builder;
   std::vector<std::string> m_columns;
+  std::map<std::string, std::string> m_columns_as;
 };
 
 class WsjcppSqlBuilder2 {

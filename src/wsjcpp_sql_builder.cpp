@@ -297,12 +297,13 @@ WsjcppSqlSelect::WsjcppSqlSelect(const std::string &tableName, WsjcppSqlBuilder2
   m_builder = builder;
 }
 
-WsjcppSqlSelect &WsjcppSqlSelect::colum(const std::string &col) {
+WsjcppSqlSelect &WsjcppSqlSelect::colum(const std::string &col, const std::string &col_as) {
   auto it = std::find(m_columns.begin(), m_columns.end(), col);
   if (it != m_columns.end()) {
     m_builder->addError("Column '" + col + "' already added to select");
   } else {
     m_columns.push_back(col);
+    m_columns_as[col] = col_as;
   }
   return *this;
 }
@@ -313,14 +314,16 @@ WsjcppSqlBuilder2 &WsjcppSqlSelect::compile() {
 
 std::string WsjcppSqlSelect::sql() {
   std::string ret = "SELECT ";
-  // TODO TOP OR LINIT for different databases
+  // TODO TOP OR LIMIT for different databases
   bool first = true;
   for (auto col : m_columns) {
-    // TODO and 'AS'
     if (!first) {
       ret += ", ";
     }
     ret += col;
+    if (m_columns_as[col] != "") {
+      ret += " AS " + m_columns_as[col];
+    }
     first = false;
   }
   ret += " FROM ";

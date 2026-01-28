@@ -30,16 +30,16 @@
 
 int main() {
   WsjcppSqlBuilder2 builder;
-  builder.selectFrom("TABLE_NAME")
-    .colum("COL1")
-    .colum("COL2")
-    .colum("COL3")
+  builder.selectFrom("table1")
+    .colum("col1")
+    .colum("col2", "c3")
+    .colum("col3")
   ;
   if (builder.hasErrors()) {
     return -1;
   }
   std::string sqlQuery = builder.sql();
-  std::string sqlQueryExpected = "SELECT COL1, COL2, COL3 FROM TABLE_NAME";
+  std::string sqlQueryExpected = "SELECT col1, col2 AS c3, col3 FROM table1";
   if (sqlQuery != sqlQueryExpected) {
     std::cerr
       << "Expected:" << std::endl
@@ -52,7 +52,7 @@ int main() {
 
   builder.clear();
 
-  
+
 
   return 0;
 }
