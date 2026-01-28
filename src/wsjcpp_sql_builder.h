@@ -29,24 +29,16 @@
 
 #include <string>
 #include <map>
+#include <vector>
+#include <memory>
+
+
 
 enum class WsjcppSqlBuilderType { SELECT, INSERT, UPDATE, DELETE };
 
-class WsjcppSqlBuilder2 {
+class WsjcppSqlQuery {
 public:
-  WsjcppSqlBuilder2 &makeSelect(const std::string &sSqlTable);
-  WsjcppSqlBuilder2 &makeInsert(const std::string &sSqlTable);
-  WsjcppSqlBuilder2 &makeUpdate(const std::string &sSqlTable);
-  WsjcppSqlBuilder2 &makeDelete(const std::string &sSqlTable);
-
-private:
-  std::string m_sTableName;
-  WsjcppSqlBuilderType m_nSqlType;
-};
-
-class WsjcppSqlBuilder {
-public:
-  WsjcppSqlBuilder(WsjcppSqlBuilderType nSqlType, const std::string &sSqlTable);
+  WsjcppSqlQuery(WsjcppSqlBuilderType nSqlType, const std::string &sSqlTable);
   bool sel(const std::string &sColumnName);
   bool add(const std::string &sColumnName, const std::string &sValue);
   bool add(const std::string &sColumnName, int nValue);
@@ -74,17 +66,55 @@ private:
   std::map<std::string, std::string> m_mapFields;
 };
 
-class WsjcppSqlBuilderSelect : public WsjcppSqlBuilder {
+class WsjcppSqlBuilderSelect : public WsjcppSqlQuery {
 public:
   WsjcppSqlBuilderSelect(const std::string &sSqlTable);
 };
 
-class WsjcppSqlBuilderInsert : public WsjcppSqlBuilder {
+class WsjcppSqlBuilderInsert : public WsjcppSqlQuery {
 public:
   WsjcppSqlBuilderInsert(const std::string &sSqlTable);
 };
 
-class WsjcppSqlBuilderUpdate : public WsjcppSqlBuilder {
+class WsjcppSqlBuilderUpdate : public WsjcppSqlQuery {
 public:
   WsjcppSqlBuilderUpdate(const std::string &sSqlTable);
+};
+
+class WsjcppSqlBuilder2;
+
+class WsjcppSqlSelect : public WsjcppSqlQuery {
+public:
+  WsjcppSqlSelect(const std::string &tableName, WsjcppSqlBuilder2 *builder);
+  WsjcppSqlSelect &colum(const std::string &col);
+  // TODO where
+  // TODO group by
+  // TODO order by
+  WsjcppSqlBuilder2 &compile();
+  std::string getSql();
+
+private:
+  std::string m_tableName;
+  WsjcppSqlBuilder2 *m_builder;
+  std::vector<std::string> m_columns;
+};
+
+class WsjcppSqlBuilder2 {
+public:
+  WsjcppSqlSelect &selectFrom(const std::string &sSqlTable);
+  WsjcppSqlBuilder2 &makeInsert(const std::string &sSqlTable);
+  WsjcppSqlBuilder2 &makeUpdate(const std::string &sSqlTable);
+  WsjcppSqlBuilder2 &makeDelete(const std::string &sSqlTable);
+
+  bool hasErrors();
+
+protected:
+  friend WsjcppSqlSelect;
+  void addError(const std::string &err);
+
+private:
+  std::vector<std::string> m_errors;
+  std::string m_tableName;
+  WsjcppSqlBuilderType m_nSqlType;
+  std::vector<std::shared_ptr<WsjcppSqlQuery>> m_queries;
 };

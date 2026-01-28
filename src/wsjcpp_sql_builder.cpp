@@ -26,39 +26,12 @@
  ***********************************************************************************/
 
 #include "wsjcpp_sql_builder.h"
+#include <algorithm>
 
 // ---------------------------------------------------------------------
-// WsjcppSqlBuilder2
+// WsjcppSqlQuery
 
-
-WsjcppSqlBuilder2 &WsjcppSqlBuilder2::makeSelect(const std::string &sSqlTable) {
-  m_sTableName = sSqlTable;
-  m_nSqlType = WsjcppSqlBuilderType::SELECT;
-  return *this;
-}
-
-WsjcppSqlBuilder2 &WsjcppSqlBuilder2::makeInsert(const std::string &sSqlTable) {
-  m_sTableName = sSqlTable;
-  m_nSqlType = WsjcppSqlBuilderType::INSERT;
-  return *this;
-}
-
-WsjcppSqlBuilder2 &WsjcppSqlBuilder2::makeUpdate(const std::string &sSqlTable) {
-  m_sTableName = sSqlTable;
-  m_nSqlType = WsjcppSqlBuilderType::UPDATE;
-  return *this;
-}
-
-WsjcppSqlBuilder2 &WsjcppSqlBuilder2::makeDelete(const std::string &sSqlTable) {
-  m_sTableName = sSqlTable;
-  m_nSqlType = WsjcppSqlBuilderType::DELETE;
-  return *this;
-}
-
-// ---------------------------------------------------------------------
-// WsjcppSqlBuilder
-
-WsjcppSqlBuilder::WsjcppSqlBuilder(WsjcppSqlBuilderType nSqlType,
+WsjcppSqlQuery::WsjcppSqlQuery(WsjcppSqlBuilderType nSqlType,
                                    const std::string &sSqlTable) {
   m_nSqlType = nSqlType;
   m_sSqlTable = sSqlTable;
@@ -80,7 +53,7 @@ WsjcppSqlBuilder::WsjcppSqlBuilder(WsjcppSqlBuilderType nSqlType,
   }
 }
 
-bool WsjcppSqlBuilder::sel(const std::string &sColumnName) {
+bool WsjcppSqlQuery::sel(const std::string &sColumnName) {
   if (!checkName(sColumnName)) {
     return false;
   }
@@ -88,7 +61,7 @@ bool WsjcppSqlBuilder::sel(const std::string &sColumnName) {
   return true;
 }
 
-bool WsjcppSqlBuilder::add(const std::string &sColumnName,
+bool WsjcppSqlQuery::add(const std::string &sColumnName,
                            const std::string &sValue) {
   if (!checkName(sColumnName)) {
     return false;
@@ -123,7 +96,7 @@ bool WsjcppSqlBuilder::add(const std::string &sColumnName,
   return true;
 }
 
-bool WsjcppSqlBuilder::add(const std::string &sColumnName, int nValue) {
+bool WsjcppSqlQuery::add(const std::string &sColumnName, int nValue) {
   if (!checkName(sColumnName)) {
     return false;
   }
@@ -141,7 +114,7 @@ bool WsjcppSqlBuilder::add(const std::string &sColumnName, int nValue) {
   return true;
 }
 
-bool WsjcppSqlBuilder::add(const std::string &sColumnName, long nValue) {
+bool WsjcppSqlQuery::add(const std::string &sColumnName, long nValue) {
   if (!checkName(sColumnName)) {
     return false;
   }
@@ -159,7 +132,7 @@ bool WsjcppSqlBuilder::add(const std::string &sColumnName, long nValue) {
   return true;
 }
 
-bool WsjcppSqlBuilder::where(const std::string &sColumnName,
+bool WsjcppSqlQuery::where(const std::string &sColumnName,
                              const std::string &sValue) {
   if (!checkName(sColumnName)) {
     return false;
@@ -176,7 +149,7 @@ bool WsjcppSqlBuilder::where(const std::string &sColumnName,
   return true;
 }
 
-bool WsjcppSqlBuilder::where(const std::string &sColumnName, int nValue) {
+bool WsjcppSqlQuery::where(const std::string &sColumnName, int nValue) {
   if (!checkName(sColumnName)) {
     return false;
   }
@@ -191,7 +164,7 @@ bool WsjcppSqlBuilder::where(const std::string &sColumnName, int nValue) {
   return true;
 }
 
-bool WsjcppSqlBuilder::where(const std::string &sColumnName, long nValue) {
+bool WsjcppSqlQuery::where(const std::string &sColumnName, long nValue) {
   if (!checkName(sColumnName)) {
     return false;
   }
@@ -206,7 +179,7 @@ bool WsjcppSqlBuilder::where(const std::string &sColumnName, long nValue) {
   return true;
 }
 
-std::string WsjcppSqlBuilder::getTextQuery() {
+std::string WsjcppSqlQuery::getTextQuery() {
   std::string sSqlQuery = "";
   size_t size0 = m_sSqlQuery0.size();
   size_t size1 = m_sSqlQuery1.size();
@@ -239,11 +212,11 @@ std::string WsjcppSqlBuilder::getTextQuery() {
   return sSqlQuery;
 }
 
-bool WsjcppSqlBuilder::isValid() { return m_bValid; }
+bool WsjcppSqlQuery::isValid() { return m_bValid; }
 
-std::string WsjcppSqlBuilder::getErrorMessage() { return m_sErrorMessage; }
+std::string WsjcppSqlQuery::getErrorMessage() { return m_sErrorMessage; }
 
-bool WsjcppSqlBuilder::checkName(const std::string &sColumnName) {
+bool WsjcppSqlQuery::checkName(const std::string &sColumnName) {
   if (sColumnName.size() < 2) {
     m_sErrorMessage =
         "Parameter '" + sColumnName + "' must more than 2 characters";
@@ -266,7 +239,7 @@ bool WsjcppSqlBuilder::checkName(const std::string &sColumnName) {
   return true;
 }
 
-std::string WsjcppSqlBuilder::prepareStringValue(const std::string &sValue) {
+std::string WsjcppSqlQuery::prepareStringValue(const std::string &sValue) {
   // escaping simbols NUL (ASCII 0), \n, \r, \, ', ", и Control-Z.
   std::string sResult;
   sResult.reserve(sValue.size() * 2);
@@ -300,16 +273,76 @@ std::string WsjcppSqlBuilder::prepareStringValue(const std::string &sValue) {
 // WsjcppSqlBuilderSelect
 
 WsjcppSqlBuilderSelect::WsjcppSqlBuilderSelect(const std::string &sSqlTable)
-    : WsjcppSqlBuilder(WsjcppSqlBuilderType::SELECT, sSqlTable) {}
+    : WsjcppSqlQuery(WsjcppSqlBuilderType::SELECT, sSqlTable) {}
 
 // ---------------------------------------------------------------------
 // WsjcppSqlBuilderInsert
 
 WsjcppSqlBuilderInsert::WsjcppSqlBuilderInsert(const std::string &sSqlTable)
-    : WsjcppSqlBuilder(WsjcppSqlBuilderType::INSERT, sSqlTable) {}
+    : WsjcppSqlQuery(WsjcppSqlBuilderType::INSERT, sSqlTable) {}
 
 // ---------------------------------------------------------------------
 // WsjcppSqlBuilderUpdate
 
 WsjcppSqlBuilderUpdate::WsjcppSqlBuilderUpdate(const std::string &sSqlTable)
-    : WsjcppSqlBuilder(WsjcppSqlBuilderType::UPDATE, sSqlTable) {}
+    : WsjcppSqlQuery(WsjcppSqlBuilderType::UPDATE, sSqlTable) {}
+
+
+// ---------------------------------------------------------------------
+// WsjcppSqlBuilderUpdate
+
+WsjcppSqlSelect::WsjcppSqlSelect(const std::string &tableName, WsjcppSqlBuilder2 *builder)
+: WsjcppSqlQuery(WsjcppSqlBuilderType::SELECT, tableName) {
+  m_tableName = tableName;
+  m_builder = builder;
+}
+
+WsjcppSqlSelect &WsjcppSqlSelect::colum(const std::string &col) {
+  auto it = std::find(m_columns.begin(), m_columns.end(), col);
+  if (it != m_columns.end()) {
+    m_builder->addError("Column '" + col + "' already added to select");
+  } else {
+    m_columns.push_back(col);
+  }
+  return *this;
+}
+
+WsjcppSqlBuilder2 &WsjcppSqlSelect::compile() {
+  return *m_builder;
+}
+
+// ---------------------------------------------------------------------
+// WsjcppSqlBuilder2
+
+WsjcppSqlSelect &WsjcppSqlBuilder2::selectFrom(const std::string &tableName) {
+  m_tableName = tableName;
+  m_nSqlType = WsjcppSqlBuilderType::SELECT;
+  m_queries.push_back(std::make_shared<WsjcppSqlSelect>(m_tableName, this));
+  return *(WsjcppSqlSelect *)(m_queries[m_queries.size() -1].get());
+}
+
+WsjcppSqlBuilder2 &WsjcppSqlBuilder2::makeInsert(const std::string &tableName) {
+  m_tableName = tableName;
+  m_nSqlType = WsjcppSqlBuilderType::INSERT;
+  return *this;
+}
+
+WsjcppSqlBuilder2 &WsjcppSqlBuilder2::makeUpdate(const std::string &tableName) {
+  m_tableName = tableName;
+  m_nSqlType = WsjcppSqlBuilderType::UPDATE;
+  return *this;
+}
+
+WsjcppSqlBuilder2 &WsjcppSqlBuilder2::makeDelete(const std::string &tableName) {
+  m_tableName = tableName;
+  m_nSqlType = WsjcppSqlBuilderType::DELETE;
+  return *this;
+}
+
+bool WsjcppSqlBuilder2::hasErrors() {
+  return m_errors.size() > 0;
+}
+
+void WsjcppSqlBuilder2::addError(const std::string &err) {
+  m_errors.push_back(err);
+}
