@@ -311,6 +311,26 @@ WsjcppSqlBuilder2 &WsjcppSqlSelect::compile() {
   return *m_builder;
 }
 
+std::string WsjcppSqlSelect::sql() {
+  std::string ret = "SELECT ";
+  // TODO TOP OR LINIT for different databases
+  bool first = true;
+  for (auto col : m_columns) {
+    // TODO and 'AS'
+    if (!first) {
+      ret += ", ";
+    }
+    ret += col;
+    first = false;
+  }
+  ret += " FROM ";
+  ret += m_tableName;
+  // TODO where
+  // TODO group by
+  // TODO order by
+  return ret;
+}
+
 // ---------------------------------------------------------------------
 // WsjcppSqlBuilder2
 
@@ -345,4 +365,19 @@ bool WsjcppSqlBuilder2::hasErrors() {
 
 void WsjcppSqlBuilder2::addError(const std::string &err) {
   m_errors.push_back(err);
+}
+
+std::string WsjcppSqlBuilder2::sql() {
+  std::string ret = "";
+  for (auto query : m_queries) {
+    if (ret.size() > 0) {
+      ret += "\n";
+    }
+    ret += query->sql();
+  }
+  return ret;
+}
+
+void WsjcppSqlBuilder2::clear() {
+  m_queries.clear();
 }

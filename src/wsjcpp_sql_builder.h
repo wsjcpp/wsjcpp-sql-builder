@@ -51,6 +51,8 @@ public:
   bool isValid();
   std::string getErrorMessage();
 
+  virtual std::string sql() { return ""; }; // TODO = 0;
+
 private:
   std::string prepareStringValue(const std::string &sValue);
   bool checkName(const std::string &sColumnName);
@@ -83,6 +85,13 @@ public:
 
 class WsjcppSqlBuilder2;
 
+// class WsjcppSqlWhere {
+// public:
+//   WsjcppSqlWhere();
+
+// };
+
+
 class WsjcppSqlSelect : public WsjcppSqlQuery {
 public:
   WsjcppSqlSelect(const std::string &tableName, WsjcppSqlBuilder2 *builder);
@@ -91,7 +100,7 @@ public:
   // TODO group by
   // TODO order by
   WsjcppSqlBuilder2 &compile();
-  std::string getSql();
+  virtual std::string sql() override;
 
 private:
   std::string m_tableName;
@@ -107,6 +116,8 @@ public:
   WsjcppSqlBuilder2 &makeDelete(const std::string &sSqlTable);
 
   bool hasErrors();
+  std::string sql();
+  void clear();
 
 protected:
   friend WsjcppSqlSelect;

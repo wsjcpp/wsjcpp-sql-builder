@@ -35,8 +35,24 @@ int main() {
     .colum("COL2")
     .colum("COL3")
   ;
-  builder.hasErrors();
-  // builder.sql();
+  if (builder.hasErrors()) {
+    return -1;
+  }
+  std::string sqlQuery = builder.sql();
+  std::string sqlQueryExpected = "SELECT COL1, COL2, COL3 FROM TABLE_NAME";
+  if (sqlQuery != sqlQueryExpected) {
+    std::cerr
+      << "Expected:" << std::endl
+      << "   " << sqlQueryExpected << std::endl
+      << ", but got:" << std::endl
+      << "   " << sqlQuery << std::endl
+    ;
+    return -1;
+  }
+
+  builder.clear();
+
+  
 
   return 0;
 }
