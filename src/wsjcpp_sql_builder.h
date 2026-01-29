@@ -51,7 +51,7 @@ private:
   std::string m_tableName;
 };
 
-class WsjcppSqlBuilder2;
+class WsjcppSqlBuilder;
 
 enum class WsjcppSqlWhereType { LOGICAL_OPERATOR, CONDITION, SUB_CONDITION };
 
@@ -100,7 +100,7 @@ class WsjcppSqlSelect;
 template<class T>
 class WsjcppSqlWhere : public WsjcppSqlWhereBase {
 public:
-  WsjcppSqlWhere(WsjcppSqlWhere<T> *parent, WsjcppSqlBuilder2 *builder, T *query)
+  WsjcppSqlWhere(WsjcppSqlWhere<T> *parent, WsjcppSqlBuilder *builder, T *query)
     : WsjcppSqlWhereBase(WsjcppSqlWhereType::SUB_CONDITION), m_parent(parent), m_builder(builder), m_query(query) { }
 
   template <typename TVal>
@@ -210,7 +210,7 @@ private:
     return *this;
   }
 
-  WsjcppSqlBuilder2 *m_builder;
+  WsjcppSqlBuilder *m_builder;
   T *m_query;
   WsjcppSqlWhere<T> *m_parent;
   std::vector<std::shared_ptr<WsjcppSqlWhereBase>> m_conditions;
@@ -218,31 +218,51 @@ private:
 
 class WsjcppSqlSelect : public WsjcppSqlQuery {
 public:
-  WsjcppSqlSelect(const std::string &tableName, WsjcppSqlBuilder2 *builder);
+  WsjcppSqlSelect(const std::string &tableName, WsjcppSqlBuilder *builder);
   WsjcppSqlSelect &colum(const std::string &col, const std::string &col_as = "");
 
   WsjcppSqlWhere<WsjcppSqlSelect> &where();
   // TODO group by
   // TODO order by
-  WsjcppSqlBuilder2 &compile();
+  WsjcppSqlBuilder &compile();
   virtual std::string sql() override;
 
 private:
   std::string m_tableName;
-  WsjcppSqlBuilder2 *m_builder;
+  WsjcppSqlBuilder *m_builder;
   std::shared_ptr<WsjcppSqlWhere<WsjcppSqlSelect>> m_where;
   std::vector<std::string> m_columns;
   std::map<std::string, std::string> m_columns_as;
 };
 
-class WsjcppSqlBuilder2 {
+
+// class WsjcppSqlInsert : public WsjcppSqlQuery {
+// public:
+//   WsjcppSqlInsert(const std::string &tableName, WsjcppSqlBuilder *builder);
+//   WsjcppSqlInsert &colum(const std::string &col, const std::string &col_as = "");
+
+//   WsjcppSqlWhere<WsjcppSqlInsert> &where();
+//   // TODO group by
+//   // TODO order by
+//   WsjcppSqlBuilder &compile();
+//   virtual std::string sql() override;
+
+// private:
+//   std::string m_tableName;
+//   WsjcppSqlBuilder *m_builder;
+//   std::shared_ptr<WsjcppSqlWhere<WsjcppSqlSelect>> m_where;
+//   std::vector<std::string> m_columns;
+//   std::map<std::string, std::string> m_columns_as;
+// };
+
+class WsjcppSqlBuilder {
 public:
   // TODO begin / end transaction can be added here
 
   WsjcppSqlSelect &selectFrom(const std::string &tableName);
-  WsjcppSqlBuilder2 &insertInto(const std::string &tableName);
-  // WsjcppSqlBuilder2 &makeUpdate(const std::string &sSqlTable);
-  // WsjcppSqlBuilder2 &makeDelete(const std::string &sSqlTable);
+  WsjcppSqlBuilder &insertInto(const std::string &tableName);
+  // WsjcppSqlBuilder &makeUpdate(const std::string &sSqlTable);
+  // WsjcppSqlBuilder &makeDelete(const std::string &sSqlTable);
 
   bool hasErrors();
   std::string sql();

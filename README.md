@@ -23,7 +23,7 @@ Example main func:
 #include <wsjcpp_sql_builder.h>
 
 int main(int argc, const char* argv[]) {
-  WsjcppSqlBuilder2 builder;
+  WsjcppSqlBuilder builder;
   builder.selectFrom("table1")
   .colum("col1")
   .colum("col2", "c3")
