@@ -86,7 +86,7 @@ public:
 class WsjcppSqlBuilder2;
 
 
-enum class WsjcppSqlWhereType { LOGICAL_OPERATOR, CONDITION, SUB };
+enum class WsjcppSqlWhereType { LOGICAL_OPERATOR, CONDITION, SUB_CONDITION };
 
 class WsjcppSqlWhereBase {
 public:
@@ -130,7 +130,8 @@ class WsjcppSqlSelect;
 template<class T>
 class WsjcppSqlWhere : public WsjcppSqlWhereBase {
 public:
-  WsjcppSqlWhere(WsjcppSqlBuilder2 *builder, T *query) : WsjcppSqlWhereBase(WsjcppSqlWhereType::SUB), m_builder(builder), m_query(query) { }
+  WsjcppSqlWhere(WsjcppSqlWhere<T> *parent, WsjcppSqlBuilder2 *builder, T *query)
+    : WsjcppSqlWhereBase(WsjcppSqlWhereType::SUB_CONDITION), m_parent(parent), m_builder(builder), m_query(query) { }
 
   WsjcppSqlWhere<T> &notEqual(const std::string &name, const std::string &value) {
     cond(name, WsjcppSqlWhereConditionType::NOT_EQUAL, value);
@@ -184,6 +185,28 @@ public:
     return *this;
   }
 
+  WsjcppSqlWhere<T> &subCondition() {
+    if (
+      m_conditions.size() > 0
+      && m_conditions[m_conditions.size()-1]->type() == WsjcppSqlWhereType::CONDITION
+    ) {
+        and_(); // default add and_
+    }
+    auto sub_cond = std::make_shared<WsjcppSqlWhere<T>>(this, m_builder, m_query);
+    m_conditions.push_back(sub_cond);
+    return *(sub_cond.get());
+  }
+
+  WsjcppSqlWhere<T> &finishSubCondition() {
+    // TODO return parent
+    if (m_parent != nullptr) {
+      return *m_parent;
+    }
+    // default return current where
+    // TODO warning to builder
+    return *this;
+  }
+
   T &endWhere() {
     return *m_query;
   }
@@ -191,7 +214,11 @@ public:
   virtual std::string sql() override {
     std::string ret = "";
     for (auto item : m_conditions) {
-      ret += item->sql();
+      if (item->type() == WsjcppSqlWhereType::SUB_CONDITION) {
+        ret += "(" + item->sql() + ")";
+      } else {
+        ret += item->sql();
+      }
     }
     return ret;
   }
@@ -210,6 +237,7 @@ private:
 
   WsjcppSqlBuilder2 *m_builder;
   T *m_query;
+  WsjcppSqlWhere<T> *m_parent;
   std::vector<std::shared_ptr<WsjcppSqlWhereBase>> m_conditions;
 };
 

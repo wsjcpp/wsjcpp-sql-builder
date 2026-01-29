@@ -387,7 +387,7 @@ WsjcppSqlSelect &WsjcppSqlSelect::colum(const std::string &col, const std::strin
 
 WsjcppSqlWhere<WsjcppSqlSelect> &WsjcppSqlSelect::where() {
   if (!m_where) {
-    m_where = std::make_shared<WsjcppSqlWhere<WsjcppSqlSelect>>(m_builder, this);
+    m_where = std::make_shared<WsjcppSqlWhere<WsjcppSqlSelect>>(nullptr, m_builder, this);
   }
 
   return *(m_where.get());

@@ -34,18 +34,29 @@ int main() {
     .colum("col1")
     .colum("col2", "c3")
     .colum("col3")
+    .colum("col4")
     .where()
       .equal("col1", "1")
       .or_()
       .notEqual("col2", "2")
-    .endWhere()
-    // .groupBy()
+      .or_()
+      .subCondition()
+        .equal("c3", "4")
+        // .and_() // be default must be added and
+        .equal("col2", "5")
+      .finishSubCondition()
+      .or_()
+      .lessThen("col4", "...")
+    .endWhere() // need only for groupBy havingBy and etc
   ;
   if (builder.hasErrors()) {
     return -1;
   }
   std::string sqlQuery = builder.sql();
-  std::string sqlQueryExpected = "SELECT col1, col2 AS c3, col3 FROM table1 WHERE col1 = \"1\" OR col2 <> \"2\"";
+  std::string sqlQueryExpected =
+    "SELECT col1, col2 AS c3, col3, col4 "
+    "FROM table1 "
+    "WHERE col1 = \"1\" OR col2 <> \"2\" OR (c3 = \"4\" AND col2 = \"5\") OR col4 < \"...\"";
   if (sqlQuery != sqlQueryExpected) {
     std::cerr
       << "Expected:" << std::endl
