@@ -38,7 +38,7 @@ int main() {
       .equal("col1", "1")
       .or_()
       .notEqual("col2", "2")
-      .endWhere()
+    .endWhere()
     // .groupBy()
   ;
   if (builder.hasErrors()) {

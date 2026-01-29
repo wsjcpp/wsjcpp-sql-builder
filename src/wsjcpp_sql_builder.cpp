@@ -302,13 +302,13 @@ WsjcppSqlWhereType WsjcppSqlWhereBase::type() {
 // ---------------------------------------------------------------------
 // WsjcppSqlWhereOr
 
-WsjcppSqlWhereOr::WsjcppSqlWhereOr() : WsjcppSqlWhereBase(WsjcppSqlWhereType::OR) { }
+WsjcppSqlWhereOr::WsjcppSqlWhereOr() : WsjcppSqlWhereBase(WsjcppSqlWhereType::LOGICAL_OPERATOR) { }
 std::string WsjcppSqlWhereOr::sql() { return " OR "; };
 
 // ---------------------------------------------------------------------
 // WsjcppSqlWhereAnd
 
-WsjcppSqlWhereAnd::WsjcppSqlWhereAnd() : WsjcppSqlWhereBase(WsjcppSqlWhereType::AND) { }
+WsjcppSqlWhereAnd::WsjcppSqlWhereAnd() : WsjcppSqlWhereBase(WsjcppSqlWhereType::LOGICAL_OPERATOR) { }
 std::string WsjcppSqlWhereAnd::sql() { return " AND "; };
 
 // ---------------------------------------------------------------------
@@ -362,87 +362,7 @@ std::string WsjcppSqlWhereCondition::sql() {
   return ret;
 }
 
-// ---------------------------------------------------------------------
-// WsjcppSqlWhere
 
-WsjcppSqlWhere &WsjcppSqlWhere::cond(const std::string &name, WsjcppSqlWhereConditionType comparator, const std::string &value) {
-  if (
-    m_conditions.size() > 0
-    && m_conditions[m_conditions.size()-1]->type() == WsjcppSqlWhereType::CONDITION
-  ) {
-      and_(); // default add and_
-  }
-
-  m_conditions.push_back(std::make_shared<WsjcppSqlWhereCondition>(name, comparator, value));
-  return *this;
-}
-
-WsjcppSqlWhere &WsjcppSqlWhere::notEqual(const std::string &name, const std::string &value) {
-  cond(name, WsjcppSqlWhereConditionType::NOT_EQUAL, value);
-  return *this;
-}
-
-WsjcppSqlWhere &WsjcppSqlWhere::equal(const std::string &name, const std::string &value) {
-  cond(name, WsjcppSqlWhereConditionType::EQUAL, value);
-  return *this;
-}
-
-WsjcppSqlWhere &WsjcppSqlWhere::moreThen(const std::string &name, const std::string &value) {
-  cond(name, WsjcppSqlWhereConditionType::MORE_THEN, value);
-  return *this;
-}
-
-WsjcppSqlWhere &WsjcppSqlWhere::lessThen(const std::string &name, const std::string &value) {
-  cond(name, WsjcppSqlWhereConditionType::LESS_THEN, value);
-  return *this;
-}
-
-WsjcppSqlWhere &WsjcppSqlWhere::like(const std::string &name, const std::string &value) {
-  cond(name, WsjcppSqlWhereConditionType::LIKE, value);
-  return *this;
-}
-
-
-WsjcppSqlWhere &WsjcppSqlWhere::or_() {
-  if (
-    m_conditions.size() > 0
-    && (
-      m_conditions[m_conditions.size()-1]->type() == WsjcppSqlWhereType::OR
-      || m_conditions[m_conditions.size()-1]->type() == WsjcppSqlWhereType::AND
-    )
-  ) {
-    // TODO add to builder errors;
-    // std::cerr << "[WARNING] WsjcppSqlWhere. Last item alredy defined 'or' or 'and'. current will be skipped." << std::endl;
-    return *this;
-  }
-
-  m_conditions.push_back(std::make_shared<WsjcppSqlWhereOr>());
-  return *this;
-}
-
-WsjcppSqlWhere &WsjcppSqlWhere::and_() {
-  if (
-    m_conditions.size() > 0
-    && (
-      m_conditions[m_conditions.size()-1]->type() == WsjcppSqlWhereType::OR
-      || m_conditions[m_conditions.size()-1]->type() == WsjcppSqlWhereType::AND
-    )
-  ) {
-    // TODO add to builder errors;
-    // std::cerr << "[WARNING] WsjcppSqlWhere. Last item alredy defined 'or' or 'and'. current will be skipped." << std::endl;
-    return *this;
-  }
-  m_conditions.push_back(std::make_shared<WsjcppSqlWhereAnd>());
-  return *this;
-}
-
-std::string WsjcppSqlWhere::sql() {
-  std::string ret = "";
-  for (auto item : m_conditions) {
-    ret += item->sql();
-  }
-  return ret;
-};
 
 // ---------------------------------------------------------------------
 // WsjcppSqlBuilderUpdate
@@ -465,11 +385,9 @@ WsjcppSqlSelect &WsjcppSqlSelect::colum(const std::string &col, const std::strin
   return *this;
 }
 
-// WsjcppSqlWhere<WsjcppSqlSelect> &WsjcppSqlSelect::where() {
-WsjcppSqlWhere &WsjcppSqlSelect::where() {
+WsjcppSqlWhere<WsjcppSqlSelect> &WsjcppSqlSelect::where() {
   if (!m_where) {
-    // m_where = std::make_shared<WsjcppSqlWhere<WsjcppSqlSelect>>();
-    m_where = std::make_shared<WsjcppSqlWhere>(m_builder, this);
+    m_where = std::make_shared<WsjcppSqlWhere<WsjcppSqlSelect>>(m_builder, this);
   }
 
   return *(m_where.get());
