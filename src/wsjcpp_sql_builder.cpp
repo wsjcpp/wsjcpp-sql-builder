@@ -62,235 +62,19 @@ std::string WsjcppSqlBuilderHelpers::escapingStringValue(const std::string &sVal
   return sResult;
 }
 
-// ---------------------------------------------------------------------
-// WsjcppSqlQuery
 
-WsjcppSqlQuery::WsjcppSqlQuery(WsjcppSqlBuilderType nSqlType,
-                                   const std::string &sSqlTable) {
-  m_nSqlType = nSqlType;
-  m_sSqlTable = sSqlTable;
-  m_bValid = true;
-  if (m_nSqlType == WsjcppSqlBuilderType::SELECT) {
-    m_sSqlQuery0 = "SELECT ";
-    m_sSqlQuery1 = " FROM " + sSqlTable;
-    m_sSqlQuery2 = "";
-  } else if (m_nSqlType == WsjcppSqlBuilderType::INSERT) {
-    m_sSqlQuery0 = "INSERT INTO " + sSqlTable + "(";
-    m_sSqlQuery1 = ") VALUES (";
-    m_sSqlQuery2 = ");";
-  } else if (m_nSqlType == WsjcppSqlBuilderType::UPDATE) {
-    m_sSqlQuery0 = "UPDATE " + sSqlTable + " SET ";
-    m_sSqlQuery1 = " WHERE ";
-  } else {
-    m_sErrorMessage = "Unknown sql type";
-    m_bValid = false;
-  }
+WsjcppSqlQuery::WsjcppSqlQuery(WsjcppSqlBuilderType sqlType, const std::string &tableName)
+  : m_sqlType(sqlType), m_tableName(tableName) {
+
 }
 
-bool WsjcppSqlQuery::sel(const std::string &sColumnName) {
-  if (!checkName(sColumnName)) {
-    return false;
-  }
-  m_sSqlQuery0 += sColumnName + ", ";
-  return true;
+WsjcppSqlBuilderType WsjcppSqlQuery::sqlType() {
+  return m_sqlType;
 }
 
-bool WsjcppSqlQuery::add(const std::string &sColumnName,
-                           const std::string &sValue) {
-  if (!checkName(sColumnName)) {
-    return false;
-  }
-  if (m_nSqlType == WsjcppSqlBuilderType::SELECT) {
-    m_sErrorMessage = "For select you could not use 'add'";
-    m_bValid = false;
-  } else if (m_nSqlType == WsjcppSqlBuilderType::INSERT) {
-    m_sSqlQuery0 += sColumnName + ", ";
-    m_sSqlQuery1 += WsjcppSqlBuilderHelpers::escapingStringValue(sValue) + ", ";
-  } else if (m_nSqlType == WsjcppSqlBuilderType::UPDATE) {
-    m_sSqlQuery0 += sColumnName + " = " + WsjcppSqlBuilderHelpers::escapingStringValue(sValue);
-  } else {
-    m_sErrorMessage = "Unknown sql type";
-    m_bValid = false;
-  }
-
-  // m_sSqlQuery = sBefore + sEscapedValue + sAfter;
-
-  //   while (true) {
-  //   /* Locate the substring to replace. */
-  //   index = str.find(sName, index);
-  //   if (index == std::string::npos)
-  //     return false;
-
-  //   /* Make the replacement. */
-  //   str.replace(index, 3, "def");
-
-  //   /* Advance index forward so the next iteration doesn't pick it up as
-  //   well. */ index += 3;
-  // }
-  return true;
+const std::string &WsjcppSqlQuery::tableName() {
+  return m_tableName;
 }
-
-bool WsjcppSqlQuery::add(const std::string &sColumnName, int nValue) {
-  if (!checkName(sColumnName)) {
-    return false;
-  }
-
-  if (m_nSqlType == WsjcppSqlBuilderType::SELECT) {
-    m_sErrorMessage = "For select you could not use 'add'";
-    m_bValid = false;
-  } else if (m_nSqlType == WsjcppSqlBuilderType::INSERT) {
-    m_sSqlQuery0 += sColumnName + ", ";
-    m_sSqlQuery1 += std::to_string(nValue) + ", ";
-  } else if (m_nSqlType == WsjcppSqlBuilderType::UPDATE) {
-    m_sSqlQuery0 += sColumnName + " = " + std::to_string(nValue);
-  }
-
-  return true;
-}
-
-bool WsjcppSqlQuery::add(const std::string &sColumnName, long nValue) {
-  if (!checkName(sColumnName)) {
-    return false;
-  }
-
-  if (m_nSqlType == WsjcppSqlBuilderType::SELECT) {
-    m_sErrorMessage = "For select you could not use 'add'";
-    m_bValid = false;
-  } else if (m_nSqlType == WsjcppSqlBuilderType::INSERT) {
-    m_sSqlQuery0 += sColumnName + ", ";
-    m_sSqlQuery1 += std::to_string(nValue) + ", ";
-  } else if (m_nSqlType == WsjcppSqlBuilderType::UPDATE) {
-    m_sSqlQuery0 += sColumnName + " = " + std::to_string(nValue);
-  }
-
-  return true;
-}
-
-bool WsjcppSqlQuery::where(const std::string &sColumnName,
-                             const std::string &sValue) {
-  if (!checkName(sColumnName)) {
-    return false;
-  }
-  if (m_nSqlType == WsjcppSqlBuilderType::SELECT) {
-    m_sSqlQuery2 += sColumnName + " = " + WsjcppSqlBuilderHelpers::escapingStringValue(sValue);
-  } else if (m_nSqlType == WsjcppSqlBuilderType::INSERT) {
-    m_sErrorMessage = "where can be in insert";
-    return false;
-  } else if (m_nSqlType == WsjcppSqlBuilderType::UPDATE) {
-    m_sSqlQuery1 += sColumnName + " = " + WsjcppSqlBuilderHelpers::escapingStringValue(sValue);
-  }
-
-  return true;
-}
-
-bool WsjcppSqlQuery::where(const std::string &sColumnName, int nValue) {
-  if (!checkName(sColumnName)) {
-    return false;
-  }
-  if (m_nSqlType == WsjcppSqlBuilderType::SELECT) {
-    m_sSqlQuery2 += sColumnName + " = " + std::to_string(nValue);
-  } else if (m_nSqlType == WsjcppSqlBuilderType::INSERT) {
-    m_sErrorMessage = "where can be in insert";
-    return false;
-  } else if (m_nSqlType == WsjcppSqlBuilderType::UPDATE) {
-    m_sSqlQuery1 += sColumnName + " = " + std::to_string(nValue);
-  }
-  return true;
-}
-
-bool WsjcppSqlQuery::where(const std::string &sColumnName, long nValue) {
-  if (!checkName(sColumnName)) {
-    return false;
-  }
-  if (m_nSqlType == WsjcppSqlBuilderType::SELECT) {
-    m_sSqlQuery2 += sColumnName + " = " + std::to_string(nValue);
-  } else if (m_nSqlType == WsjcppSqlBuilderType::INSERT) {
-    m_sErrorMessage = "where can be in insert";
-    return false;
-  } else if (m_nSqlType == WsjcppSqlBuilderType::UPDATE) {
-    m_sSqlQuery1 += sColumnName + " = " + std::to_string(nValue);
-  }
-  return true;
-}
-
-std::string WsjcppSqlQuery::getTextQuery() {
-  std::string sSqlQuery = "";
-  size_t size0 = m_sSqlQuery0.size();
-  size_t size1 = m_sSqlQuery1.size();
-  size_t size2 = m_sSqlQuery2.size();
-  if (m_nSqlType == WsjcppSqlBuilderType::SELECT) {
-    // TODO refactor this to vector and join
-    sSqlQuery = m_sSqlQuery0;
-    if (size0 > 2 && m_sSqlQuery0[size0 - 1] == ' ' &&
-        m_sSqlQuery0[size0 - 2] == ',') {
-      sSqlQuery += m_sSqlQuery0.substr(0, size0 - 2);
-    }
-    sSqlQuery += m_sSqlQuery1;
-    if (size2 > 2 && m_sSqlQuery2[size2 - 1] == ' ' &&
-        m_sSqlQuery2[size2 - 2] == ',') {
-      sSqlQuery += m_sSqlQuery2.substr(0, size2 - 2);
-    }
-  } else if (m_nSqlType == WsjcppSqlBuilderType::INSERT) {
-    if (size0 > 2 && m_sSqlQuery0[size0 - 1] == ' ' &&
-        m_sSqlQuery0[size0 - 2] == ',') {
-      sSqlQuery += m_sSqlQuery0.substr(0, size0 - 2);
-    }
-    if (size1 > 2 && m_sSqlQuery1[size1 - 1] == ' ' &&
-        m_sSqlQuery1[size1 - 2] == ',') {
-      sSqlQuery += m_sSqlQuery1.substr(0, size1 - 2);
-    }
-    sSqlQuery += m_sSqlQuery2;
-  } else if (m_nSqlType == WsjcppSqlBuilderType::UPDATE) {
-    sSqlQuery = m_sSqlQuery0 + m_sSqlQuery1 + m_sSqlQuery2;
-  }
-  return sSqlQuery;
-}
-
-bool WsjcppSqlQuery::isValid() { return m_bValid; }
-
-std::string WsjcppSqlQuery::getErrorMessage() { return m_sErrorMessage; }
-
-bool WsjcppSqlQuery::checkName(const std::string &sColumnName) {
-  if (sColumnName.size() < 2) {
-    m_sErrorMessage =
-        "Parameter '" + sColumnName + "' must more than 2 characters";
-    m_bValid = false;
-    return false;
-  }
-  // TODO check alphabet
-
-  // if (sName[0] != ':') {
-  //   m_sErrorMessage = "Parameter '" + sName + "' must starts with ':'";
-  //   m_bValid = false;
-  //   return false;
-  // }
-  // nIndex = m_sSqlQuery.find(sName, 0);
-  // if (nIndex == std::string::npos) {
-  //   m_sErrorMessage = "Not found '" + sName + "' in " + m_sSqlQuery;
-  //   m_bValid = false;
-  //   return false;
-  // }
-  return true;
-}
-
-// ---------------------------------------------------------------------
-// WsjcppSqlBuilderSelect
-
-WsjcppSqlBuilderSelect::WsjcppSqlBuilderSelect(const std::string &sSqlTable)
-    : WsjcppSqlQuery(WsjcppSqlBuilderType::SELECT, sSqlTable) {}
-
-// ---------------------------------------------------------------------
-// WsjcppSqlBuilderInsert
-
-WsjcppSqlBuilderInsert::WsjcppSqlBuilderInsert(const std::string &sSqlTable)
-    : WsjcppSqlQuery(WsjcppSqlBuilderType::INSERT, sSqlTable) {}
-
-// ---------------------------------------------------------------------
-// WsjcppSqlBuilderUpdate
-
-WsjcppSqlBuilderUpdate::WsjcppSqlBuilderUpdate(const std::string &sSqlTable)
-    : WsjcppSqlQuery(WsjcppSqlBuilderType::UPDATE, sSqlTable) {}
-
 
 // ---------------------------------------------------------------------
 // WsjcppSqlWhereBase
@@ -390,8 +174,6 @@ std::string WsjcppSqlWhereCondition::sql() {
   return ret;
 }
 
-
-
 // ---------------------------------------------------------------------
 // WsjcppSqlBuilderUpdate
 
@@ -468,23 +250,23 @@ WsjcppSqlSelect &WsjcppSqlBuilder2::selectFrom(const std::string &tableName) {
   return *(WsjcppSqlSelect *)(m_queries[m_queries.size() -1].get());
 }
 
-WsjcppSqlBuilder2 &WsjcppSqlBuilder2::makeInsert(const std::string &tableName) {
+WsjcppSqlBuilder2 &WsjcppSqlBuilder2::insertInto(const std::string &tableName) {
   m_tableName = tableName;
   m_nSqlType = WsjcppSqlBuilderType::INSERT;
   return *this;
 }
 
-WsjcppSqlBuilder2 &WsjcppSqlBuilder2::makeUpdate(const std::string &tableName) {
-  m_tableName = tableName;
-  m_nSqlType = WsjcppSqlBuilderType::UPDATE;
-  return *this;
-}
+// WsjcppSqlBuilder2 &WsjcppSqlBuilder2::makeUpdate(const std::string &tableName) {
+//   m_tableName = tableName;
+//   m_nSqlType = WsjcppSqlBuilderType::UPDATE;
+//   return *this;
+// }
 
-WsjcppSqlBuilder2 &WsjcppSqlBuilder2::makeDelete(const std::string &tableName) {
-  m_tableName = tableName;
-  m_nSqlType = WsjcppSqlBuilderType::DELETE;
-  return *this;
-}
+// WsjcppSqlBuilder2 &WsjcppSqlBuilder2::makeDelete(const std::string &tableName) {
+//   m_tableName = tableName;
+//   m_nSqlType = WsjcppSqlBuilderType::DELETE;
+//   return *this;
+// }
 
 bool WsjcppSqlBuilder2::hasErrors() {
   return m_errors.size() > 0;

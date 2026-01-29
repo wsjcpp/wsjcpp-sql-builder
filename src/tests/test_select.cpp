@@ -50,6 +50,7 @@ int main() {
     .endWhere() // need only for groupBy havingBy and etc
   ;
   if (builder.hasErrors()) {
+    std::cerr << "Select builder has some errors" << std::endl;
     return -1;
   }
   std::string sqlQuery = builder.sql();

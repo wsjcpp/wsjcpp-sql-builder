@@ -37,58 +37,21 @@ public:
   static std::string escapingStringValue(const std::string &sValue);
 };
 
-
-
 enum class WsjcppSqlBuilderType { SELECT, INSERT, UPDATE, DELETE };
 
 class WsjcppSqlQuery {
 public:
-  WsjcppSqlQuery(WsjcppSqlBuilderType nSqlType, const std::string &sSqlTable);
-  bool sel(const std::string &sColumnName);
-  bool add(const std::string &sColumnName, const std::string &sValue);
-  bool add(const std::string &sColumnName, int nValue);
-  bool add(const std::string &sColumnName, long nValue);
-  bool where(const std::string &sColumnName, const std::string &sValue);
-  bool where(const std::string &sColumnName, int nValue);
-  bool where(const std::string &sColumnName, long nValue);
-
-  std::string getTextQuery();
-  bool isValid();
-  std::string getErrorMessage();
-
-  virtual std::string sql() { return ""; }; // TODO = 0;
+  WsjcppSqlQuery(WsjcppSqlBuilderType sqlType, const std::string &tableName);
+  WsjcppSqlBuilderType sqlType();
+  const std::string &tableName();
+  virtual std::string sql() = 0;
 
 private:
-  bool checkName(const std::string &sColumnName);
-  WsjcppSqlBuilderType m_nSqlType;
-  std::string m_sSqlTable;
-  std::string m_sErrorMessage;
-  bool m_bValid;
-
-  // query parts
-  std::string m_sSqlQuery0;
-  std::string m_sSqlQuery1;
-  std::string m_sSqlQuery2;
-  std::map<std::string, std::string> m_mapFields;
-};
-
-class WsjcppSqlBuilderSelect : public WsjcppSqlQuery {
-public:
-  WsjcppSqlBuilderSelect(const std::string &sSqlTable);
-};
-
-class WsjcppSqlBuilderInsert : public WsjcppSqlQuery {
-public:
-  WsjcppSqlBuilderInsert(const std::string &sSqlTable);
-};
-
-class WsjcppSqlBuilderUpdate : public WsjcppSqlQuery {
-public:
-  WsjcppSqlBuilderUpdate(const std::string &sSqlTable);
+  WsjcppSqlBuilderType m_sqlType;
+  std::string m_tableName;
 };
 
 class WsjcppSqlBuilder2;
-
 
 enum class WsjcppSqlWhereType { LOGICAL_OPERATOR, CONDITION, SUB_CONDITION };
 
@@ -276,10 +239,10 @@ class WsjcppSqlBuilder2 {
 public:
   // TODO begin / end transaction can be added here
 
-  WsjcppSqlSelect &selectFrom(const std::string &sSqlTable);
-  WsjcppSqlBuilder2 &makeInsert(const std::string &sSqlTable);
-  WsjcppSqlBuilder2 &makeUpdate(const std::string &sSqlTable);
-  WsjcppSqlBuilder2 &makeDelete(const std::string &sSqlTable);
+  WsjcppSqlSelect &selectFrom(const std::string &tableName);
+  WsjcppSqlBuilder2 &insertInto(const std::string &tableName);
+  // WsjcppSqlBuilder2 &makeUpdate(const std::string &sSqlTable);
+  // WsjcppSqlBuilder2 &makeDelete(const std::string &sSqlTable);
 
   bool hasErrors();
   std::string sql();

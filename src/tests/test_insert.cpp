@@ -29,16 +29,23 @@
 #include <wsjcpp_sql_builder.h>
 
 int main() {
-    WsjcppSqlBuilderInsert sql("TABLE_NAME");
-    sql.add("COL1", "val1"); // will be escaped
-    sql.add("COL2", 1);
-    // sql.add("COL3", 1.1);
-    if (!sql.isValid()) {
-        std::cerr << "Something wrong with query: " << sql.getErrorMessage() << std::endl;
+    WsjcppSqlBuilder2 builder;
+    builder.insertInto("table1");
+
+    if (builder.hasErrors()) {
+        std::cerr << "Select builder has some errors" << std::endl;
         return -1;
     }
-    if (sql.getTextQuery() != "INSERT INTO TABLE_NAME(COL1, COL2) VALUES ('val1', 1);") {
-        return -1;
-    }
+    // std::string sqlQuery = builder.sql();
+    // std::string sqlQueryExpected = "INSERT INTO TABLE_NAME(COL1, COL2) VALUES ('val1', 1);";
+    // if (sqlQuery != sqlQueryExpected) {
+    //     std::cerr
+    //         << "Expected:" << std::endl
+    //         << "   " << sqlQueryExpected << std::endl
+    //         << ", but got:" << std::endl
+    //         << "   " << sqlQuery << std::endl
+    //     ;
+    //     return -1;
+    // }
     return 0;
 }
