@@ -243,17 +243,37 @@ public:
   WsjcppSqlInsert &addColums(const std::vector<std::string> &cols);
   WsjcppSqlInsert &clearValues();
 
-  WsjcppSqlInsert &val(const std::string &col);
-  WsjcppSqlInsert &val(int col);
-  WsjcppSqlInsert &val(float col);
-  WsjcppSqlInsert &val(double col);
+  WsjcppSqlInsert &val(const std::string &val);
+  WsjcppSqlInsert &val(int val);
+  WsjcppSqlInsert &val(float val);
+  WsjcppSqlInsert &val(double val);
 
-  WsjcppSqlBuilder &builder();
   virtual std::string sql() override;
 
 private:
   std::vector<std::string> m_columns;
   std::vector<std::string> m_values;
+};
+
+class WsjcppSqlUpdate : public WsjcppSqlQuery {
+public:
+  WsjcppSqlUpdate(const std::string &tableName, WsjcppSqlBuilder *builder);
+
+  WsjcppSqlUpdate &set(const std::string &name, const std::string &val);
+  WsjcppSqlUpdate &set(const std::string &name, int val);
+  WsjcppSqlUpdate &set(const std::string &name, float val);
+  WsjcppSqlUpdate &set(const std::string &name, double val);
+
+  WsjcppSqlWhere<WsjcppSqlUpdate> &where();
+
+  virtual std::string sql() override;
+
+private:
+  WsjcppSqlUpdate &setValue(const std::string &name, const std::string &val);
+
+  std::shared_ptr<WsjcppSqlWhere<WsjcppSqlUpdate>> m_where;
+  std::vector<std::string> m_columns;
+  std::map<std::string, std::string> m_values;
 };
 
 class WsjcppSqlBuilder {
@@ -263,7 +283,8 @@ public:
   WsjcppSqlSelect &selectFrom(const std::string &tableName);
   WsjcppSqlInsert &insertInto(const std::string &tableName);
   WsjcppSqlInsert &findInsertOrCreate(const std::string &tableName);
-  // WsjcppSqlBuilder &update(const std::string &sSqlTable);
+  WsjcppSqlUpdate &update(const std::string &tableName);
+  WsjcppSqlUpdate &findUpdateOrCreate(const std::string &tableName);
   // WsjcppSqlBuilder &deleteFrom(const std::string &sSqlTable);
 
   bool hasErrors();
@@ -272,6 +293,8 @@ public:
 
 protected:
   friend WsjcppSqlSelect;
+  friend WsjcppSqlInsert;
+  friend WsjcppSqlUpdate;
   friend WsjcppSqlWhere<WsjcppSqlSelect>;
   void addError(const std::string &err);
 
