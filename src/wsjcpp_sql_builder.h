@@ -37,21 +37,24 @@ public:
   static std::string escapingStringValue(const std::string &sValue);
 };
 
-enum class WsjcppSqlBuilderType { SELECT, INSERT, UPDATE, DELETE };
+enum class WsjcppSqlQueryType { SELECT, INSERT, UPDATE, DELETE };
+
+class WsjcppSqlBuilder;
 
 class WsjcppSqlQuery {
 public:
-  WsjcppSqlQuery(WsjcppSqlBuilderType sqlType, const std::string &tableName);
-  WsjcppSqlBuilderType sqlType();
+  WsjcppSqlQuery(WsjcppSqlQueryType sqlType, WsjcppSqlBuilder *builder, const std::string &tableName);
+  WsjcppSqlQueryType sqlType();
+  WsjcppSqlBuilder &builder();
+  WsjcppSqlBuilder *builderRawPtr();
   const std::string &tableName();
   virtual std::string sql() = 0;
 
 private:
-  WsjcppSqlBuilderType m_sqlType;
+  WsjcppSqlQueryType m_sqlType;
   std::string m_tableName;
+  WsjcppSqlBuilder *m_builder;
 };
-
-class WsjcppSqlBuilder;
 
 enum class WsjcppSqlWhereType { LOGICAL_OPERATOR, CONDITION, SUB_CONDITION };
 
@@ -224,36 +227,27 @@ public:
   WsjcppSqlWhere<WsjcppSqlSelect> &where();
   // TODO group by
   // TODO order by
-  WsjcppSqlBuilder &compile();
   virtual std::string sql() override;
 
 private:
-  std::string m_tableName;
-  WsjcppSqlBuilder *m_builder;
   std::shared_ptr<WsjcppSqlWhere<WsjcppSqlSelect>> m_where;
   std::vector<std::string> m_columns;
   std::map<std::string, std::string> m_columns_as;
 };
 
 
-// class WsjcppSqlInsert : public WsjcppSqlQuery {
-// public:
-//   WsjcppSqlInsert(const std::string &tableName, WsjcppSqlBuilder *builder);
-//   WsjcppSqlInsert &colum(const std::string &col, const std::string &col_as = "");
+class WsjcppSqlInsert : public WsjcppSqlQuery {
+public:
+  WsjcppSqlInsert(const std::string &tableName, WsjcppSqlBuilder *builder);
+  // WsjcppSqlInsert &colum(const std::string &col);
 
-//   WsjcppSqlWhere<WsjcppSqlInsert> &where();
-//   // TODO group by
-//   // TODO order by
-//   WsjcppSqlBuilder &compile();
-//   virtual std::string sql() override;
+  WsjcppSqlBuilder &builder();
+  virtual std::string sql() override;
 
-// private:
-//   std::string m_tableName;
-//   WsjcppSqlBuilder *m_builder;
-//   std::shared_ptr<WsjcppSqlWhere<WsjcppSqlSelect>> m_where;
-//   std::vector<std::string> m_columns;
-//   std::map<std::string, std::string> m_columns_as;
-// };
+private:
+  std::vector<std::string> m_columns;
+  std::map<std::string, std::string> m_columns_as;
+};
 
 class WsjcppSqlBuilder {
 public:
@@ -261,8 +255,8 @@ public:
 
   WsjcppSqlSelect &selectFrom(const std::string &tableName);
   WsjcppSqlBuilder &insertInto(const std::string &tableName);
-  // WsjcppSqlBuilder &makeUpdate(const std::string &sSqlTable);
-  // WsjcppSqlBuilder &makeDelete(const std::string &sSqlTable);
+  // WsjcppSqlBuilder &update(const std::string &sSqlTable);
+  // WsjcppSqlBuilder &deleteFrom(const std::string &sSqlTable);
 
   bool hasErrors();
   std::string sql();
@@ -276,6 +270,6 @@ protected:
 private:
   std::vector<std::string> m_errors;
   std::string m_tableName;
-  WsjcppSqlBuilderType m_nSqlType;
+  WsjcppSqlQueryType m_nSqlType;
   std::vector<std::shared_ptr<WsjcppSqlQuery>> m_queries;
 };
