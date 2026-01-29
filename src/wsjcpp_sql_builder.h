@@ -32,6 +32,11 @@
 #include <vector>
 #include <memory>
 
+class WsjcppSqlBuilderHelpers {
+public:
+  static std::string escapingStringValue(const std::string &sValue);
+};
+
 
 
 enum class WsjcppSqlBuilderType { SELECT, INSERT, UPDATE, DELETE };
@@ -54,7 +59,6 @@ public:
   virtual std::string sql() { return ""; }; // TODO = 0;
 
 private:
-  std::string prepareStringValue(const std::string &sValue);
   bool checkName(const std::string &sColumnName);
   WsjcppSqlBuilderType m_nSqlType;
   std::string m_sSqlTable;
@@ -115,6 +119,9 @@ enum class WsjcppSqlWhereConditionType { NOT_EQUAL, EQUAL, MORE_THEN, LESS_THEN,
 class WsjcppSqlWhereCondition : public WsjcppSqlWhereBase {
 public:
   WsjcppSqlWhereCondition(const std::string &name, WsjcppSqlWhereConditionType comparator, const std::string &value);
+  WsjcppSqlWhereCondition(const std::string &name, WsjcppSqlWhereConditionType comparator, int value);
+  WsjcppSqlWhereCondition(const std::string &name, WsjcppSqlWhereConditionType comparator, double value);
+  WsjcppSqlWhereCondition(const std::string &name, WsjcppSqlWhereConditionType comparator, float value);
   const std::string &name();
   WsjcppSqlWhereConditionType comparator();
   const std::string &value();
@@ -133,22 +140,26 @@ public:
   WsjcppSqlWhere(WsjcppSqlWhere<T> *parent, WsjcppSqlBuilder2 *builder, T *query)
     : WsjcppSqlWhereBase(WsjcppSqlWhereType::SUB_CONDITION), m_parent(parent), m_builder(builder), m_query(query) { }
 
-  WsjcppSqlWhere<T> &notEqual(const std::string &name, const std::string &value) {
+  template <typename TVal>
+  WsjcppSqlWhere<T> &notEqual(const std::string &name, TVal value) {
     cond(name, WsjcppSqlWhereConditionType::NOT_EQUAL, value);
     return *this;
   }
 
-  WsjcppSqlWhere<T> &equal(const std::string &name, const std::string &value) {
+  template <typename TVal>
+  WsjcppSqlWhere<T> &equal(const std::string &name, TVal value) {
     cond(name, WsjcppSqlWhereConditionType::EQUAL, value);
     return *this;
   }
 
-  WsjcppSqlWhere<T> &moreThen(const std::string &name, const std::string &value) {
+  template <typename TVal>
+  WsjcppSqlWhere<T> &moreThen(const std::string &name, TVal value) {
     cond(name, WsjcppSqlWhereConditionType::MORE_THEN, value);
     return *this;
   }
 
-  WsjcppSqlWhere<T> &lessThen(const std::string &name, const std::string &value) {
+  template <typename TVal>
+  WsjcppSqlWhere<T> &lessThen(const std::string &name, TVal value) {
     cond(name, WsjcppSqlWhereConditionType::LESS_THEN, value);
     return *this;
   }
@@ -224,7 +235,8 @@ public:
   }
 
 private:
-  WsjcppSqlWhere<T> &cond(const std::string &name, WsjcppSqlWhereConditionType comparator, const std::string &value) {
+  template <typename TVal>
+  WsjcppSqlWhere<T> &cond(const std::string &name, WsjcppSqlWhereConditionType comparator, TVal value) {
     if (
       m_conditions.size() > 0
       && m_conditions[m_conditions.size()-1]->type() == WsjcppSqlWhereType::CONDITION

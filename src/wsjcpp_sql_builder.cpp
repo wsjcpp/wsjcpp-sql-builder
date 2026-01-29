@@ -28,6 +28,40 @@
 #include "wsjcpp_sql_builder.h"
 #include <algorithm>
 
+
+// ---------------------------------------------------------------------
+// WsjcppSqlBuilderHelpers
+
+std::string WsjcppSqlBuilderHelpers::escapingStringValue(const std::string &sValue) {
+  // escaping simbols NUL (ASCII 0), \n, \r, \, ', ", и Control-Z.
+  std::string sResult;
+  sResult.reserve(sValue.size() * 2);
+  sResult.push_back('\'');
+  for (int i = 0; i < sValue.size(); i++) {
+    char c = sValue[i];
+    if (c == '\n') {
+      sResult.push_back('\\');
+      sResult.push_back('n');
+    } else if (c == '\r') {
+      sResult.push_back('\\');
+      sResult.push_back('r');
+    } else if (c == '\\' || c == '"') {
+      sResult.push_back('\\');
+      sResult.push_back(c);
+    } else if (c == '\'') {
+      sResult.push_back('\'');
+      sResult.push_back(c);
+    } else if (c == 0) {
+      sResult.push_back('\\');
+      sResult.push_back('0');
+    } else {
+      sResult.push_back(c);
+    }
+  }
+  sResult.push_back('\'');
+  return sResult;
+}
+
 // ---------------------------------------------------------------------
 // WsjcppSqlQuery
 
@@ -71,9 +105,9 @@ bool WsjcppSqlQuery::add(const std::string &sColumnName,
     m_bValid = false;
   } else if (m_nSqlType == WsjcppSqlBuilderType::INSERT) {
     m_sSqlQuery0 += sColumnName + ", ";
-    m_sSqlQuery1 += prepareStringValue(sValue) + ", ";
+    m_sSqlQuery1 += WsjcppSqlBuilderHelpers::escapingStringValue(sValue) + ", ";
   } else if (m_nSqlType == WsjcppSqlBuilderType::UPDATE) {
-    m_sSqlQuery0 += sColumnName + " = " + prepareStringValue(sValue);
+    m_sSqlQuery0 += sColumnName + " = " + WsjcppSqlBuilderHelpers::escapingStringValue(sValue);
   } else {
     m_sErrorMessage = "Unknown sql type";
     m_bValid = false;
@@ -138,12 +172,12 @@ bool WsjcppSqlQuery::where(const std::string &sColumnName,
     return false;
   }
   if (m_nSqlType == WsjcppSqlBuilderType::SELECT) {
-    m_sSqlQuery2 += sColumnName + " = " + prepareStringValue(sValue);
+    m_sSqlQuery2 += sColumnName + " = " + WsjcppSqlBuilderHelpers::escapingStringValue(sValue);
   } else if (m_nSqlType == WsjcppSqlBuilderType::INSERT) {
     m_sErrorMessage = "where can be in insert";
     return false;
   } else if (m_nSqlType == WsjcppSqlBuilderType::UPDATE) {
-    m_sSqlQuery1 += sColumnName + " = " + prepareStringValue(sValue);
+    m_sSqlQuery1 += sColumnName + " = " + WsjcppSqlBuilderHelpers::escapingStringValue(sValue);
   }
 
   return true;
@@ -239,36 +273,6 @@ bool WsjcppSqlQuery::checkName(const std::string &sColumnName) {
   return true;
 }
 
-std::string WsjcppSqlQuery::prepareStringValue(const std::string &sValue) {
-  // escaping simbols NUL (ASCII 0), \n, \r, \, ', ", и Control-Z.
-  std::string sResult;
-  sResult.reserve(sValue.size() * 2);
-  sResult.push_back('\'');
-  for (int i = 0; i < sValue.size(); i++) {
-    char c = sValue[i];
-    if (c == '\n') {
-      sResult.push_back('\\');
-      sResult.push_back('n');
-    } else if (c == '\r') {
-      sResult.push_back('\\');
-      sResult.push_back('r');
-    } else if (c == '\\' || c == '"') {
-      sResult.push_back('\\');
-      sResult.push_back(c);
-    } else if (c == '\'') {
-      sResult.push_back('\'');
-      sResult.push_back(c);
-    } else if (c == 0) {
-      sResult.push_back('\\');
-      sResult.push_back('0');
-    } else {
-      sResult.push_back(c);
-    }
-  }
-  sResult.push_back('\'');
-  return sResult;
-}
-
 // ---------------------------------------------------------------------
 // WsjcppSqlBuilderSelect
 
@@ -318,9 +322,33 @@ WsjcppSqlWhereCondition::WsjcppSqlWhereCondition(
   const std::string &name,
   WsjcppSqlWhereConditionType comparator,
   const std::string &value
-)
-  : WsjcppSqlWhereBase(WsjcppSqlWhereType::CONDITION), m_name(name), m_comparator(comparator), m_value(value) {
+) : WsjcppSqlWhereBase(WsjcppSqlWhereType::CONDITION), m_name(name), m_comparator(comparator) {
+  // TODO in different databases different quotes, mssql have a column names in double quotes
+  m_value = WsjcppSqlBuilderHelpers::escapingStringValue(value);
+}
 
+WsjcppSqlWhereCondition::WsjcppSqlWhereCondition(
+  const std::string &name,
+  WsjcppSqlWhereConditionType comparator,
+  int value
+) : WsjcppSqlWhereBase(WsjcppSqlWhereType::CONDITION), m_name(name), m_comparator(comparator) {
+  m_value = std::to_string(value);
+}
+
+WsjcppSqlWhereCondition::WsjcppSqlWhereCondition(
+  const std::string &name,
+  WsjcppSqlWhereConditionType comparator,
+  double value
+) : WsjcppSqlWhereBase(WsjcppSqlWhereType::CONDITION), m_name(name), m_comparator(comparator) {
+  m_value = std::to_string(value);
+}
+
+WsjcppSqlWhereCondition::WsjcppSqlWhereCondition(
+  const std::string &name,
+  WsjcppSqlWhereConditionType comparator,
+  float value
+) : WsjcppSqlWhereBase(WsjcppSqlWhereType::CONDITION), m_name(name), m_comparator(comparator) {
+  m_value = std::to_string(value);
 }
 
 const std::string &WsjcppSqlWhereCondition::name() {
@@ -358,7 +386,7 @@ std::string WsjcppSqlWhereCondition::sql() {
       ret += " unknwon_operator ";
       break;
   }
-  ret += "\"" + m_value + "\""; // TODO validate and escaping
+  ret += m_value;
   return ret;
 }
 

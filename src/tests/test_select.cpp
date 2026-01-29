@@ -46,7 +46,7 @@ int main() {
         .equal("col2", "5")
       .finishSubCondition()
       .or_()
-      .lessThen("col4", "...")
+      .lessThen("col4", 111)
     .endWhere() // need only for groupBy havingBy and etc
   ;
   if (builder.hasErrors()) {
@@ -56,7 +56,7 @@ int main() {
   std::string sqlQueryExpected =
     "SELECT col1, col2 AS c3, col3, col4 "
     "FROM table1 "
-    "WHERE col1 = \"1\" OR col2 <> \"2\" OR (c3 = \"4\" AND col2 = \"5\") OR col4 < \"...\"";
+    "WHERE col1 = '1' OR col2 <> '2' OR (c3 = '4' AND col2 = '5') OR col4 < 111";
   if (sqlQuery != sqlQueryExpected) {
     std::cerr
       << "Expected:" << std::endl
