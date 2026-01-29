@@ -248,9 +248,63 @@ WsjcppSqlInsert::WsjcppSqlInsert(const std::string &tableName, WsjcppSqlBuilder 
 
 }
 
+WsjcppSqlInsert &WsjcppSqlInsert::colum(const std::string &col) {
+  m_columns.push_back(col);
+  return *this;
+}
+
+WsjcppSqlInsert &WsjcppSqlInsert::addColums(const std::vector<std::string> &cols) {
+  for (auto col : cols) {
+    m_columns.push_back(col);
+  }
+  return *this;
+}
+
+WsjcppSqlInsert &WsjcppSqlInsert::val(const std::string &val) {
+  m_values.push_back(WsjcppSqlBuilderHelpers::escapingStringValue(val));
+  return *this;
+}
+
+WsjcppSqlInsert &WsjcppSqlInsert::val(int val) {
+  m_values.push_back(std::to_string(val));
+  return *this;
+}
+
+WsjcppSqlInsert &WsjcppSqlInsert::val(float val) {
+  m_values.push_back(std::to_string(val));
+  return *this;
+}
+
+WsjcppSqlInsert &WsjcppSqlInsert::val(double val) {
+  m_values.push_back(std::to_string(val));
+  return *this;
+}
 
 std::string WsjcppSqlInsert::sql() {
   std::string ret = "INSERT INTO " + tableName();
+
+  // TODO if columns is empty
+  ret += "(";
+  bool first = true;
+  for (auto col : m_columns) {
+    if (!first) {
+      ret += ", ";
+    }
+    ret += col;
+    first = false;
+  }
+  ret += ")";
+
+  ret += " VALUES(";
+  first = true;
+  for (auto val : m_values) {
+    if (!first) {
+      ret += ", ";
+    }
+    ret += val;
+    first = false;
+  }
+  ret += ")";
 
   return ret;
 };
@@ -259,17 +313,14 @@ std::string WsjcppSqlInsert::sql() {
 // WsjcppSqlBuilder
 
 WsjcppSqlSelect &WsjcppSqlBuilder::selectFrom(const std::string &tableName) {
-  m_tableName = tableName;
-  m_nSqlType = WsjcppSqlQueryType::SELECT;
-  m_queries.push_back(std::make_shared<WsjcppSqlSelect>(m_tableName, this));
+  m_queries.push_back(std::make_shared<WsjcppSqlSelect>(tableName, this));
   // TODO check must be select last one;
   return *(WsjcppSqlSelect *)(m_queries[m_queries.size() -1].get());
 }
 
-WsjcppSqlBuilder &WsjcppSqlBuilder::insertInto(const std::string &tableName) {
-  m_tableName = tableName;
-  m_nSqlType = WsjcppSqlQueryType::INSERT;
-  return *this;
+WsjcppSqlInsert &WsjcppSqlBuilder::insertInto(const std::string &tableName) {
+  m_queries.push_back(std::make_shared<WsjcppSqlInsert>(tableName, this));
+  return *(WsjcppSqlInsert *)(m_queries[m_queries.size() -1].get());;
 }
 
 // WsjcppSqlBuilder &WsjcppSqlBuilder::makeUpdate(const std::string &tableName) {

@@ -239,14 +239,20 @@ private:
 class WsjcppSqlInsert : public WsjcppSqlQuery {
 public:
   WsjcppSqlInsert(const std::string &tableName, WsjcppSqlBuilder *builder);
-  // WsjcppSqlInsert &colum(const std::string &col);
+  WsjcppSqlInsert &colum(const std::string &col);
+  WsjcppSqlInsert &addColums(const std::vector<std::string> &cols);
+
+  WsjcppSqlInsert &val(const std::string &col);
+  WsjcppSqlInsert &val(int col);
+  WsjcppSqlInsert &val(float col);
+  WsjcppSqlInsert &val(double col);
 
   WsjcppSqlBuilder &builder();
   virtual std::string sql() override;
 
 private:
   std::vector<std::string> m_columns;
-  std::map<std::string, std::string> m_columns_as;
+  std::vector<std::string> m_values;
 };
 
 class WsjcppSqlBuilder {
@@ -254,7 +260,7 @@ public:
   // TODO begin / end transaction can be added here
 
   WsjcppSqlSelect &selectFrom(const std::string &tableName);
-  WsjcppSqlBuilder &insertInto(const std::string &tableName);
+  WsjcppSqlInsert &insertInto(const std::string &tableName);
   // WsjcppSqlBuilder &update(const std::string &sSqlTable);
   // WsjcppSqlBuilder &deleteFrom(const std::string &sSqlTable);
 
@@ -269,7 +275,5 @@ protected:
 
 private:
   std::vector<std::string> m_errors;
-  std::string m_tableName;
-  WsjcppSqlQueryType m_nSqlType;
   std::vector<std::shared_ptr<WsjcppSqlQuery>> m_queries;
 };
