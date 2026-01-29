@@ -34,12 +34,18 @@ int main() {
     .colum("col1")
     .colum("col2", "c3")
     .colum("col3")
+    .where()
+      .equal("col1", "1")
+      .or_()
+      .notEqual("col2", "2")
+      .endWhere()
+    // .groupBy()
   ;
   if (builder.hasErrors()) {
     return -1;
   }
   std::string sqlQuery = builder.sql();
-  std::string sqlQueryExpected = "SELECT col1, col2 AS c3, col3 FROM table1";
+  std::string sqlQueryExpected = "SELECT col1, col2 AS c3, col3 FROM table1 WHERE col1 = \"1\" OR col2 <> \"2\"";
   if (sqlQuery != sqlQueryExpected) {
     std::cerr
       << "Expected:" << std::endl
@@ -51,8 +57,14 @@ int main() {
   }
 
   builder.clear();
-
-
+  sqlQuery = builder.sql();
+  if (sqlQuery != "") {
+    std::cerr
+      << "Expected empty, but got: " << std::endl
+      << "   " << sqlQuery << std::endl
+    ;
+    return -1;
+  }
 
   return 0;
 }

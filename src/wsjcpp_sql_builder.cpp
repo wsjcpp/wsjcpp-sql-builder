@@ -289,10 +289,167 @@ WsjcppSqlBuilderUpdate::WsjcppSqlBuilderUpdate(const std::string &sSqlTable)
 
 
 // ---------------------------------------------------------------------
+// WsjcppSqlWhereBase
+
+WsjcppSqlWhereBase::WsjcppSqlWhereBase(WsjcppSqlWhereType type) : m_type(type) {
+
+};
+
+WsjcppSqlWhereType WsjcppSqlWhereBase::type() {
+  return m_type;
+}
+
+// ---------------------------------------------------------------------
+// WsjcppSqlWhereOr
+
+WsjcppSqlWhereOr::WsjcppSqlWhereOr() : WsjcppSqlWhereBase(WsjcppSqlWhereType::OR) { }
+std::string WsjcppSqlWhereOr::sql() { return " OR "; };
+
+// ---------------------------------------------------------------------
+// WsjcppSqlWhereAnd
+
+WsjcppSqlWhereAnd::WsjcppSqlWhereAnd() : WsjcppSqlWhereBase(WsjcppSqlWhereType::AND) { }
+std::string WsjcppSqlWhereAnd::sql() { return " AND "; };
+
+// ---------------------------------------------------------------------
+// WsjcppSqlWhereCondition
+
+WsjcppSqlWhereCondition::WsjcppSqlWhereCondition(
+  const std::string &name,
+  WsjcppSqlWhereConditionType comparator,
+  const std::string &value
+)
+  : WsjcppSqlWhereBase(WsjcppSqlWhereType::CONDITION), m_name(name), m_comparator(comparator), m_value(value) {
+
+}
+
+const std::string &WsjcppSqlWhereCondition::name() {
+  return m_name;
+}
+
+WsjcppSqlWhereConditionType WsjcppSqlWhereCondition::comparator() {
+  return m_comparator;
+}
+
+const std::string &WsjcppSqlWhereCondition::value() {
+  return m_value;
+}
+
+std::string WsjcppSqlWhereCondition::sql() {
+  std::string ret;
+  ret += m_name; // TODO validate and escaping
+  switch (m_comparator) {
+    case WsjcppSqlWhereConditionType::NOT_EQUAL:
+      ret += " <> ";
+      break;
+    case WsjcppSqlWhereConditionType::EQUAL:
+      ret += " = ";
+      break;
+    case WsjcppSqlWhereConditionType::MORE_THEN:
+      ret += " > ";
+      break;
+    case WsjcppSqlWhereConditionType::LESS_THEN:
+      ret += " < ";
+      break;
+    case WsjcppSqlWhereConditionType::LIKE:
+      ret += " LIKE ";
+      break;
+    default:
+      ret += " unknwon_operator ";
+      break;
+  }
+  ret += "\"" + m_value + "\""; // TODO validate and escaping
+  return ret;
+}
+
+// ---------------------------------------------------------------------
+// WsjcppSqlWhere
+
+WsjcppSqlWhere &WsjcppSqlWhere::cond(const std::string &name, WsjcppSqlWhereConditionType comparator, const std::string &value) {
+  if (
+    m_conditions.size() > 0
+    && m_conditions[m_conditions.size()-1]->type() == WsjcppSqlWhereType::CONDITION
+  ) {
+      and_(); // default add and_
+  }
+
+  m_conditions.push_back(std::make_shared<WsjcppSqlWhereCondition>(name, comparator, value));
+  return *this;
+}
+
+WsjcppSqlWhere &WsjcppSqlWhere::notEqual(const std::string &name, const std::string &value) {
+  cond(name, WsjcppSqlWhereConditionType::NOT_EQUAL, value);
+  return *this;
+}
+
+WsjcppSqlWhere &WsjcppSqlWhere::equal(const std::string &name, const std::string &value) {
+  cond(name, WsjcppSqlWhereConditionType::EQUAL, value);
+  return *this;
+}
+
+WsjcppSqlWhere &WsjcppSqlWhere::moreThen(const std::string &name, const std::string &value) {
+  cond(name, WsjcppSqlWhereConditionType::MORE_THEN, value);
+  return *this;
+}
+
+WsjcppSqlWhere &WsjcppSqlWhere::lessThen(const std::string &name, const std::string &value) {
+  cond(name, WsjcppSqlWhereConditionType::LESS_THEN, value);
+  return *this;
+}
+
+WsjcppSqlWhere &WsjcppSqlWhere::like(const std::string &name, const std::string &value) {
+  cond(name, WsjcppSqlWhereConditionType::LIKE, value);
+  return *this;
+}
+
+
+WsjcppSqlWhere &WsjcppSqlWhere::or_() {
+  if (
+    m_conditions.size() > 0
+    && (
+      m_conditions[m_conditions.size()-1]->type() == WsjcppSqlWhereType::OR
+      || m_conditions[m_conditions.size()-1]->type() == WsjcppSqlWhereType::AND
+    )
+  ) {
+    // TODO add to builder errors;
+    // std::cerr << "[WARNING] WsjcppSqlWhere. Last item alredy defined 'or' or 'and'. current will be skipped." << std::endl;
+    return *this;
+  }
+
+  m_conditions.push_back(std::make_shared<WsjcppSqlWhereOr>());
+  return *this;
+}
+
+WsjcppSqlWhere &WsjcppSqlWhere::and_() {
+  if (
+    m_conditions.size() > 0
+    && (
+      m_conditions[m_conditions.size()-1]->type() == WsjcppSqlWhereType::OR
+      || m_conditions[m_conditions.size()-1]->type() == WsjcppSqlWhereType::AND
+    )
+  ) {
+    // TODO add to builder errors;
+    // std::cerr << "[WARNING] WsjcppSqlWhere. Last item alredy defined 'or' or 'and'. current will be skipped." << std::endl;
+    return *this;
+  }
+  m_conditions.push_back(std::make_shared<WsjcppSqlWhereAnd>());
+  return *this;
+}
+
+std::string WsjcppSqlWhere::sql() {
+  std::string ret = "";
+  for (auto item : m_conditions) {
+    ret += item->sql();
+  }
+  return ret;
+};
+
+// ---------------------------------------------------------------------
 // WsjcppSqlBuilderUpdate
 
 WsjcppSqlSelect::WsjcppSqlSelect(const std::string &tableName, WsjcppSqlBuilder2 *builder)
 : WsjcppSqlQuery(WsjcppSqlBuilderType::SELECT, tableName) {
+  // TODO multitype table names with AS
   m_tableName = tableName;
   m_builder = builder;
 }
@@ -308,6 +465,16 @@ WsjcppSqlSelect &WsjcppSqlSelect::colum(const std::string &col, const std::strin
   return *this;
 }
 
+// WsjcppSqlWhere<WsjcppSqlSelect> &WsjcppSqlSelect::where() {
+WsjcppSqlWhere &WsjcppSqlSelect::where() {
+  if (!m_where) {
+    // m_where = std::make_shared<WsjcppSqlWhere<WsjcppSqlSelect>>();
+    m_where = std::make_shared<WsjcppSqlWhere>(m_builder, this);
+  }
+
+  return *(m_where.get());
+}
+
 WsjcppSqlBuilder2 &WsjcppSqlSelect::compile() {
   return *m_builder;
 }
@@ -315,19 +482,29 @@ WsjcppSqlBuilder2 &WsjcppSqlSelect::compile() {
 std::string WsjcppSqlSelect::sql() {
   std::string ret = "SELECT ";
   // TODO TOP OR LIMIT for different databases
-  bool first = true;
-  for (auto col : m_columns) {
-    if (!first) {
-      ret += ", ";
+
+  if (m_columns.size() == 0) {
+    ret += "*";
+  } else {
+    bool first = true;
+    for (auto col : m_columns) {
+      if (!first) {
+        ret += ", ";
+      }
+      ret += col;
+      if (m_columns_as[col] != "") {
+        ret += " AS " + m_columns_as[col];
+      }
+      first = false;
     }
-    ret += col;
-    if (m_columns_as[col] != "") {
-      ret += " AS " + m_columns_as[col];
-    }
-    first = false;
+    ret += " FROM ";
+    ret += m_tableName;
   }
-  ret += " FROM ";
-  ret += m_tableName;
+
+  if (m_where) {
+    ret += " WHERE " + m_where->sql();
+  }
+
   // TODO where
   // TODO group by
   // TODO order by
@@ -341,6 +518,7 @@ WsjcppSqlSelect &WsjcppSqlBuilder2::selectFrom(const std::string &tableName) {
   m_tableName = tableName;
   m_nSqlType = WsjcppSqlBuilderType::SELECT;
   m_queries.push_back(std::make_shared<WsjcppSqlSelect>(m_tableName, this));
+  // TODO check must be select last one;
   return *(WsjcppSqlSelect *)(m_queries[m_queries.size() -1].get());
 }
 
