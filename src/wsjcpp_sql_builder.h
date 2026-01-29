@@ -241,6 +241,7 @@ public:
   WsjcppSqlInsert(const std::string &tableName, WsjcppSqlBuilder *builder);
   WsjcppSqlInsert &colum(const std::string &col);
   WsjcppSqlInsert &addColums(const std::vector<std::string> &cols);
+  WsjcppSqlInsert &clearValues();
 
   WsjcppSqlInsert &val(const std::string &col);
   WsjcppSqlInsert &val(int col);
@@ -261,6 +262,7 @@ public:
 
   WsjcppSqlSelect &selectFrom(const std::string &tableName);
   WsjcppSqlInsert &insertInto(const std::string &tableName);
+  WsjcppSqlInsert &findInsertOrCreate(const std::string &tableName);
   // WsjcppSqlBuilder &update(const std::string &sSqlTable);
   // WsjcppSqlBuilder &deleteFrom(const std::string &sSqlTable);
 

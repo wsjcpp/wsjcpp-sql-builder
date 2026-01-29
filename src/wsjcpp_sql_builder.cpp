@@ -260,6 +260,11 @@ WsjcppSqlInsert &WsjcppSqlInsert::addColums(const std::vector<std::string> &cols
   return *this;
 }
 
+WsjcppSqlInsert &WsjcppSqlInsert::clearValues() {
+  m_values.clear();
+  return *this;
+}
+
 WsjcppSqlInsert &WsjcppSqlInsert::val(const std::string &val) {
   m_values.push_back(WsjcppSqlBuilderHelpers::escapingStringValue(val));
   return *this;
@@ -320,7 +325,16 @@ WsjcppSqlSelect &WsjcppSqlBuilder::selectFrom(const std::string &tableName) {
 
 WsjcppSqlInsert &WsjcppSqlBuilder::insertInto(const std::string &tableName) {
   m_queries.push_back(std::make_shared<WsjcppSqlInsert>(tableName, this));
-  return *(WsjcppSqlInsert *)(m_queries[m_queries.size() -1].get());;
+  return *(WsjcppSqlInsert *)(m_queries[m_queries.size() -1].get());
+}
+
+WsjcppSqlInsert &WsjcppSqlBuilder::findInsertOrCreate(const std::string &tableName) {
+  for (auto query : m_queries) {
+    if (query->sqlType() == WsjcppSqlQueryType::INSERT && query->tableName() == tableName) {
+      return *(WsjcppSqlInsert *)(query.get());
+    }
+  }
+  return insertInto(tableName);
 }
 
 // WsjcppSqlBuilder &WsjcppSqlBuilder::makeUpdate(const std::string &tableName) {
