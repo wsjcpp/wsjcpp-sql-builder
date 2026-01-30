@@ -405,6 +405,10 @@ std::string WsjcppSqlDelete::sql() {
 // ---------------------------------------------------------------------
 // WsjcppSqlBuilder
 
+WsjcppSqlBuilder::WsjcppSqlBuilder(WsjcppSqlBuilderForDatabase dbType) : m_dbType(dbType) {
+
+}
+
 WsjcppSqlSelect &WsjcppSqlBuilder::selectFrom(const std::string &tableName) {
   m_queries.push_back(std::make_shared<WsjcppSqlSelect>(tableName, this));
   // TODO check must be select last one;
@@ -453,6 +457,10 @@ WsjcppSqlDelete &WsjcppSqlBuilder::findDeleteOrCreate(const std::string &tableNa
   return deleteFrom(tableName);
 }
 
+void WsjcppSqlBuilder::clear() {
+  m_queries.clear();
+}
+
 bool WsjcppSqlBuilder::hasErrors() {
   return m_errors.size() > 0;
 }
@@ -472,6 +480,12 @@ std::string WsjcppSqlBuilder::sql() {
   return ret;
 }
 
-void WsjcppSqlBuilder::clear() {
-  m_queries.clear();
+
+void WsjcppSqlBuilder::setDatabaseType(WsjcppSqlBuilderForDatabase dbType) {
+  m_dbType = dbType;
 }
+
+WsjcppSqlBuilderForDatabase WsjcppSqlBuilder::databaseType() {
+  return m_dbType;
+}
+

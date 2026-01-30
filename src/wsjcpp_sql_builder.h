@@ -32,14 +32,37 @@
 #include <vector>
 #include <memory>
 
+enum class WsjcppSqlQueryType {
+  SELECT,
+  INSERT,
+  UPDATE,
+  DELETE,
+};
+
+enum class WsjcppSqlWhereType {
+  LOGICAL_OPERATOR,
+  CONDITION,
+  SUB_CONDITION,
+};
+
+enum class WsjcppSqlWhereConditionType {
+  NOT_EQUAL,
+  EQUAL,
+  MORE_THEN,
+  LESS_THEN,
+  LIKE,
+};
+
+enum class WsjcppSqlBuilderForDatabase {
+  SQLITE3,
+};
+
 class WsjcppSqlBuilderHelpers {
 public:
   static std::string escapingStringValue(const std::string &sValue);
 };
 
-enum class WsjcppSqlQueryType { SELECT, INSERT, UPDATE, DELETE };
-
-
+class WsjcppSqlBuilder;
 class WsjcppSqlQuery;
 class WsjcppSqlInsert;
 class WsjcppSqlUpdate;
@@ -47,12 +70,13 @@ class WsjcppSqlSelect;
 class WsjcppSqlDelete;
 template<class T> class WsjcppSqlWhere;
 
-
 class IWsjcppSqlBuilder {
 public:
 
   virtual bool hasErrors() = 0;
   virtual std::string sql() = 0;
+  virtual void setDatabaseType(WsjcppSqlBuilderForDatabase dbType) = 0;
+  virtual WsjcppSqlBuilderForDatabase databaseType() = 0;
 
 protected:
   friend WsjcppSqlWhere<WsjcppSqlInsert>;
@@ -63,7 +87,7 @@ protected:
   virtual void addError(const std::string &err) = 0;
 };
 
-class WsjcppSqlBuilder;
+
 
 class WsjcppSqlQuery {
 public:
@@ -79,8 +103,6 @@ private:
   std::string m_tableName;
   WsjcppSqlBuilder *m_builder;
 };
-
-enum class WsjcppSqlWhereType { LOGICAL_OPERATOR, CONDITION, SUB_CONDITION };
 
 class WsjcppSqlWhereBase {
 public:
@@ -103,8 +125,6 @@ public:
   WsjcppSqlWhereAnd();
   virtual std::string sql() override;
 };
-
-enum class WsjcppSqlWhereConditionType { NOT_EQUAL, EQUAL, MORE_THEN, LESS_THEN, LIKE };
 
 class WsjcppSqlWhereCondition : public WsjcppSqlWhereBase {
 public:
@@ -313,6 +333,8 @@ private:
 
 class WsjcppSqlBuilder : public IWsjcppSqlBuilder {
 public:
+  WsjcppSqlBuilder(WsjcppSqlBuilderForDatabase dbType = WsjcppSqlBuilderForDatabase::SQLITE3);
+  
   // TODO begin / end transaction can be added here
 
   WsjcppSqlSelect &selectFrom(const std::string &tableName);
@@ -328,6 +350,9 @@ public:
   virtual bool hasErrors() override;
   virtual std::string sql() override;
 
+  virtual void setDatabaseType(WsjcppSqlBuilderForDatabase dbType) override;
+  virtual WsjcppSqlBuilderForDatabase databaseType() override;
+
 protected:
   friend WsjcppSqlSelect;
   friend WsjcppSqlInsert;
@@ -338,4 +363,5 @@ protected:
 private:
   std::vector<std::string> m_errors;
   std::vector<std::shared_ptr<WsjcppSqlQuery>> m_queries;
+  WsjcppSqlBuilderForDatabase m_dbType;
 };
