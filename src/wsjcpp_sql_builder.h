@@ -276,6 +276,18 @@ private:
   std::map<std::string, std::string> m_values;
 };
 
+class WsjcppSqlDelete : public WsjcppSqlQuery {
+public:
+  WsjcppSqlDelete(const std::string &tableName, WsjcppSqlBuilder *builder);
+
+  WsjcppSqlWhere<WsjcppSqlDelete> &where();
+
+  virtual std::string sql() override;
+
+private:
+  std::shared_ptr<WsjcppSqlWhere<WsjcppSqlDelete>> m_where;
+};
+
 class WsjcppSqlBuilder {
 public:
   // TODO begin / end transaction can be added here
@@ -285,7 +297,8 @@ public:
   WsjcppSqlInsert &findInsertOrCreate(const std::string &tableName);
   WsjcppSqlUpdate &update(const std::string &tableName);
   WsjcppSqlUpdate &findUpdateOrCreate(const std::string &tableName);
-  // WsjcppSqlBuilder &deleteFrom(const std::string &sSqlTable);
+  WsjcppSqlDelete &deleteFrom(const std::string &sSqlTable);
+  WsjcppSqlDelete &findDeleteOrCreate(const std::string &tableName);
 
   bool hasErrors();
   std::string sql();

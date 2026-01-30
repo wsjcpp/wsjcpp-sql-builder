@@ -317,7 +317,7 @@ std::string WsjcppSqlInsert::sql() {
 // WsjcppSqlUpdate
 
 WsjcppSqlUpdate::WsjcppSqlUpdate(const std::string &tableName, WsjcppSqlBuilder *builder)
-  : WsjcppSqlQuery(WsjcppSqlQueryType::INSERT, builder, tableName) {
+  : WsjcppSqlQuery(WsjcppSqlQueryType::UPDATE, builder, tableName) {
 
 }
 
@@ -378,6 +378,31 @@ std::string WsjcppSqlUpdate::sql() {
 
 
 // ---------------------------------------------------------------------
+// WsjcppSqlDelete
+
+WsjcppSqlDelete::WsjcppSqlDelete(const std::string &tableName, WsjcppSqlBuilder *builder)
+  : WsjcppSqlQuery(WsjcppSqlQueryType::DELETE, builder, tableName) {
+
+}
+
+WsjcppSqlWhere<WsjcppSqlDelete> &WsjcppSqlDelete::where() {
+  if (!m_where) {
+    m_where = std::make_shared<WsjcppSqlWhere<WsjcppSqlDelete>>(nullptr, builderRawPtr(), this);
+  }
+  return *(m_where.get());
+}
+
+std::string WsjcppSqlDelete::sql() {
+  std::string ret = "DELETE FROM " + tableName();
+
+  if (m_where) {
+    ret += " WHERE " + m_where->sql();
+  }
+
+  return ret;
+};
+
+// ---------------------------------------------------------------------
 // WsjcppSqlBuilder
 
 WsjcppSqlSelect &WsjcppSqlBuilder::selectFrom(const std::string &tableName) {
@@ -414,11 +439,19 @@ WsjcppSqlUpdate &WsjcppSqlBuilder::findUpdateOrCreate(const std::string &tableNa
   return update(tableName);
 }
 
-// WsjcppSqlBuilder &WsjcppSqlBuilder::makeDelete(const std::string &tableName) {
-//   m_tableName = tableName;
-//   m_nSqlType = WsjcppSqlQueryType::DELETE;
-//   return *this;
-// }
+WsjcppSqlDelete &WsjcppSqlBuilder::deleteFrom(const std::string &tableName) {
+  m_queries.push_back(std::make_shared<WsjcppSqlDelete>(tableName, this));
+  return *(WsjcppSqlDelete *)(m_queries[m_queries.size() -1].get());
+}
+
+WsjcppSqlDelete &WsjcppSqlBuilder::findDeleteOrCreate(const std::string &tableName) {
+  for (auto query : m_queries) {
+    if (query->sqlType() == WsjcppSqlQueryType::DELETE && query->tableName() == tableName) {
+      return *(WsjcppSqlDelete *)(query.get());
+    }
+  }
+  return deleteFrom(tableName);
+}
 
 bool WsjcppSqlBuilder::hasErrors() {
   return m_errors.size() > 0;
