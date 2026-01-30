@@ -29,49 +29,49 @@
 #include <wsjcpp_sql_builder.h>
 
 int main() {
-    WsjcppSqlBuilder builder;
-    builder.insertInto("table2")
-        .colum("col1")
-        .addColums({"col2", "col3"})
-        .val("val1")
-        .val(1)
-        .val(2.0)
+  WsjcppSqlBuilder builder;
+  builder.insertInto("table2")
+    .colum("col1")
+    .addColums({"col2", "col3"})
+    .val("val1")
+    .val(1)
+    .val(2.0)
+  ;
+
+  if (builder.hasErrors()) {
+    std::cerr << "Select builder has some errors" << std::endl;
+    return -1;
+  }
+  std::string sqlQuery = builder.sql();
+  std::string sqlQueryExpected = "INSERT INTO table2(col1, col2, col3) VALUES('val1', 1, 2.000000)";
+  if (sqlQuery != sqlQueryExpected) {
+    std::cerr
+      << "Expected:" << std::endl
+      << "   {" << sqlQueryExpected << "}" << std::endl
+      << ", but got:" << std::endl
+      << "   {" << sqlQuery << "}" << std::endl
     ;
+    return -1;
+  }
 
-    if (builder.hasErrors()) {
-        std::cerr << "Select builder has some errors" << std::endl;
-        return -1;
-    }
-    std::string sqlQuery = builder.sql();
-    std::string sqlQueryExpected = "INSERT INTO table2(col1, col2, col3) VALUES('val1', 1, 2.000000)";
-    if (sqlQuery != sqlQueryExpected) {
-        std::cerr
-            << "Expected:" << std::endl
-            << "   {" << sqlQueryExpected << "}" << std::endl
-            << ", but got:" << std::endl
-            << "   {" << sqlQuery << "}" << std::endl
-        ;
-        return -1;
-    }
+  builder.findInsertOrCreate("table2")
+    .clearValues()
+    .val("val2")
+    .val(2)
+    .val(10.0)
+  ;
 
-    builder.findInsertOrCreate("table2")
-        .clearValues()
-        .val("val2")
-        .val(2)
-        .val(10.0)
+  sqlQuery = builder.sql();
+  sqlQueryExpected = "INSERT INTO table2(col1, col2, col3) VALUES('val2', 2, 10.000000)";
+  if (sqlQuery != sqlQueryExpected) {
+    std::cerr
+      << "Expected:" << std::endl
+      << "   {" << sqlQueryExpected << "}" << std::endl
+      << ", but got:" << std::endl
+      << "   {" << sqlQuery << "}" << std::endl
     ;
+    return -1;
+  }
 
-    sqlQuery = builder.sql();
-    sqlQueryExpected = "INSERT INTO table2(col1, col2, col3) VALUES('val2', 2, 10.000000)";
-    if (sqlQuery != sqlQueryExpected) {
-        std::cerr
-            << "Expected:" << std::endl
-            << "   {" << sqlQueryExpected << "}" << std::endl
-            << ", but got:" << std::endl
-            << "   {" << sqlQuery << "}" << std::endl
-        ;
-        return -1;
-    }
-
-    return 0;
+  return 0;
 }
