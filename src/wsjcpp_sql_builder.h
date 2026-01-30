@@ -39,6 +39,30 @@ public:
 
 enum class WsjcppSqlQueryType { SELECT, INSERT, UPDATE, DELETE };
 
+
+class WsjcppSqlQuery;
+class WsjcppSqlInsert;
+class WsjcppSqlUpdate;
+class WsjcppSqlSelect;
+class WsjcppSqlDelete;
+template<class T> class WsjcppSqlWhere;
+
+
+class IWsjcppSqlBuilder {
+public:
+
+  virtual bool hasErrors() = 0;
+  virtual std::string sql() = 0;
+
+protected:
+  friend WsjcppSqlWhere<WsjcppSqlInsert>;
+  friend WsjcppSqlWhere<WsjcppSqlUpdate>;
+  friend WsjcppSqlWhere<WsjcppSqlDelete>;
+  friend WsjcppSqlWhere<WsjcppSqlSelect>;
+  friend WsjcppSqlQuery;
+  virtual void addError(const std::string &err) = 0;
+};
+
 class WsjcppSqlBuilder;
 
 class WsjcppSqlQuery {
@@ -140,8 +164,7 @@ public:
       m_conditions.size() > 0
       && m_conditions[m_conditions.size()-1]->type() == WsjcppSqlWhereType::LOGICAL_OPERATOR
     ) {
-      // TODO
-      // m_builder->addError("[WARNING] WsjcppSqlWhere. Last item alredy defined as logical_operator. current will be skipped.");
+      addError("[WARNING] WsjcppSqlWhere. Last item alredy defined as logical_operator. current will be skipped.");
       return *this;
     }
 
@@ -154,8 +177,7 @@ public:
       m_conditions.size() > 0
       && m_conditions[m_conditions.size()-1]->type() == WsjcppSqlWhereType::LOGICAL_OPERATOR
     ) {
-      // TODO
-      // m_builder->addError("[WARNING] WsjcppSqlWhere. Last item alredy defined as logical_operator. current will be skipped.");
+      addError("[WARNING] WsjcppSqlWhere. Last item alredy defined as logical_operator. current will be skipped.");
       return *this;
     }
     m_conditions.push_back(std::make_shared<WsjcppSqlWhereAnd>());
@@ -211,6 +233,10 @@ private:
     }
     m_conditions.push_back(std::make_shared<WsjcppSqlWhereCondition>(name, comparator, value));
     return *this;
+  }
+
+  void addError(const std::string &err) {
+    ((IWsjcppSqlBuilder *)m_builder)->addError(err);
   }
 
   WsjcppSqlBuilder *m_builder;
@@ -279,16 +305,13 @@ private:
 class WsjcppSqlDelete : public WsjcppSqlQuery {
 public:
   WsjcppSqlDelete(const std::string &tableName, WsjcppSqlBuilder *builder);
-
   WsjcppSqlWhere<WsjcppSqlDelete> &where();
-
   virtual std::string sql() override;
-
 private:
   std::shared_ptr<WsjcppSqlWhere<WsjcppSqlDelete>> m_where;
 };
 
-class WsjcppSqlBuilder {
+class WsjcppSqlBuilder : public IWsjcppSqlBuilder {
 public:
   // TODO begin / end transaction can be added here
 
@@ -300,16 +323,17 @@ public:
   WsjcppSqlDelete &deleteFrom(const std::string &sSqlTable);
   WsjcppSqlDelete &findDeleteOrCreate(const std::string &tableName);
 
-  bool hasErrors();
-  std::string sql();
   void clear();
+
+  virtual bool hasErrors() override;
+  virtual std::string sql() override;
 
 protected:
   friend WsjcppSqlSelect;
   friend WsjcppSqlInsert;
   friend WsjcppSqlUpdate;
   friend WsjcppSqlWhere<WsjcppSqlSelect>;
-  void addError(const std::string &err);
+  virtual void addError(const std::string &err) override;
 
 private:
   std::vector<std::string> m_errors;
