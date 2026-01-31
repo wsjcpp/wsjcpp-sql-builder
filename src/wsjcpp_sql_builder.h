@@ -32,6 +32,8 @@
 #include <vector>
 #include <memory>
 
+namespace wsjcpp {
+
 enum class WsjcppSqlQueryType {
   SELECT,
   INSERT,
@@ -62,7 +64,7 @@ public:
   static std::string escapingStringValue(const std::string &sValue);
 };
 
-class WsjcppSqlBuilder;
+class SqlBuilder;
 class WsjcppSqlQuery;
 class WsjcppSqlInsert;
 class WsjcppSqlUpdate;
@@ -91,17 +93,17 @@ protected:
 
 class WsjcppSqlQuery {
 public:
-  WsjcppSqlQuery(WsjcppSqlQueryType sqlType, WsjcppSqlBuilder *builder, const std::string &tableName);
+  WsjcppSqlQuery(WsjcppSqlQueryType sqlType, SqlBuilder *builder, const std::string &tableName);
   WsjcppSqlQueryType sqlType();
-  WsjcppSqlBuilder &builder();
-  WsjcppSqlBuilder *builderRawPtr();
+  SqlBuilder &builder();
+  SqlBuilder *builderRawPtr();
   const std::string &tableName();
   virtual std::string sql() = 0;
 
 private:
   WsjcppSqlQueryType m_sqlType;
   std::string m_tableName;
-  WsjcppSqlBuilder *m_builder;
+  SqlBuilder *m_builder;
 };
 
 class WsjcppSqlWhereBase {
@@ -147,7 +149,7 @@ class WsjcppSqlSelect;
 template<class T>
 class WsjcppSqlWhere : public WsjcppSqlWhereBase {
 public:
-  WsjcppSqlWhere(WsjcppSqlWhere<T> *parent, WsjcppSqlBuilder *builder, T *query)
+  WsjcppSqlWhere(WsjcppSqlWhere<T> *parent, SqlBuilder *builder, T *query)
     : WsjcppSqlWhereBase(WsjcppSqlWhereType::SUB_CONDITION), m_parent(parent), m_builder(builder), m_query(query) { }
 
   template <typename TVal>
@@ -259,7 +261,7 @@ private:
     ((IWsjcppSqlBuilder *)m_builder)->addError(err);
   }
 
-  WsjcppSqlBuilder *m_builder;
+  SqlBuilder *m_builder;
   T *m_query;
   WsjcppSqlWhere<T> *m_parent;
   std::vector<std::shared_ptr<WsjcppSqlWhereBase>> m_conditions;
@@ -267,7 +269,7 @@ private:
 
 class WsjcppSqlSelect : public WsjcppSqlQuery {
 public:
-  WsjcppSqlSelect(const std::string &tableName, WsjcppSqlBuilder *builder);
+  WsjcppSqlSelect(const std::string &tableName, SqlBuilder *builder);
   WsjcppSqlSelect &colum(const std::string &col, const std::string &col_as = "");
 
   WsjcppSqlWhere<WsjcppSqlSelect> &where();
@@ -284,7 +286,7 @@ private:
 
 class WsjcppSqlInsert : public WsjcppSqlQuery {
 public:
-  WsjcppSqlInsert(const std::string &tableName, WsjcppSqlBuilder *builder);
+  WsjcppSqlInsert(const std::string &tableName, SqlBuilder *builder);
   WsjcppSqlInsert &colum(const std::string &col);
   WsjcppSqlInsert &addColums(const std::vector<std::string> &cols);
   WsjcppSqlInsert &clearValues();
@@ -303,7 +305,7 @@ private:
 
 class WsjcppSqlUpdate : public WsjcppSqlQuery {
 public:
-  WsjcppSqlUpdate(const std::string &tableName, WsjcppSqlBuilder *builder);
+  WsjcppSqlUpdate(const std::string &tableName, SqlBuilder *builder);
 
   WsjcppSqlUpdate &set(const std::string &name, const std::string &val);
   WsjcppSqlUpdate &set(const std::string &name, int val);
@@ -324,16 +326,16 @@ private:
 
 class WsjcppSqlDelete : public WsjcppSqlQuery {
 public:
-  WsjcppSqlDelete(const std::string &tableName, WsjcppSqlBuilder *builder);
+  WsjcppSqlDelete(const std::string &tableName, SqlBuilder *builder);
   WsjcppSqlWhere<WsjcppSqlDelete> &where();
   virtual std::string sql() override;
 private:
   std::shared_ptr<WsjcppSqlWhere<WsjcppSqlDelete>> m_where;
 };
 
-class WsjcppSqlBuilder : public IWsjcppSqlBuilder {
+class SqlBuilder : public IWsjcppSqlBuilder {
 public:
-  WsjcppSqlBuilder(WsjcppSqlBuilderForDatabase dbType = WsjcppSqlBuilderForDatabase::SQLITE3);
+  SqlBuilder(WsjcppSqlBuilderForDatabase dbType = WsjcppSqlBuilderForDatabase::SQLITE3);
   
   // TODO begin / end transaction can be added here
 
@@ -365,3 +367,5 @@ private:
   std::vector<std::shared_ptr<WsjcppSqlQuery>> m_queries;
   WsjcppSqlBuilderForDatabase m_dbType;
 };
+
+} // namespace wsjcpp

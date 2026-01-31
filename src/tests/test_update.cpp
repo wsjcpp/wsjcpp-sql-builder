@@ -29,7 +29,7 @@
 #include <wsjcpp_sql_builder.h>
 
 int main() {
-  WsjcppSqlBuilder builder;
+  wsjcpp::SqlBuilder builder;
   builder.update("table3")
     .set("col1", "val uuu")
     .set("col2", 1)

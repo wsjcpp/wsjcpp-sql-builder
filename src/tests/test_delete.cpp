@@ -29,7 +29,7 @@
 #include <wsjcpp_sql_builder.h>
 
 int main() {
-  WsjcppSqlBuilder builder;
+  wsjcpp::SqlBuilder builder;
   builder.deleteFrom("table4")
     .where()
       .equal("col1", "1")
