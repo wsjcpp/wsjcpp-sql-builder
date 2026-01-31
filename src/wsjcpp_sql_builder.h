@@ -34,20 +34,20 @@
 
 namespace wsjcpp {
 
-enum class WsjcppSqlQueryType {
+enum class SqlQueryType {
   SELECT,
   INSERT,
   UPDATE,
   DELETE,
 };
 
-enum class WsjcppSqlWhereType {
+enum class SqlWhereType {
   LOGICAL_OPERATOR,
   CONDITION,
   SUB_CONDITION,
 };
 
-enum class WsjcppSqlWhereConditionType {
+enum class SqlWhereConditionType {
   NOT_EQUAL,
   EQUAL,
   MORE_THEN,
@@ -55,170 +55,170 @@ enum class WsjcppSqlWhereConditionType {
   LIKE,
 };
 
-enum class WsjcppSqlBuilderForDatabase {
+enum class SqlBuilderForDatabase {
   SQLITE3,
 };
 
-class WsjcppSqlBuilderHelpers {
+class SqlBuilderHelpers {
 public:
   static std::string escapingStringValue(const std::string &sValue);
 };
 
 class SqlBuilder;
-class WsjcppSqlQuery;
-class WsjcppSqlInsert;
-class WsjcppSqlUpdate;
-class WsjcppSqlSelect;
-class WsjcppSqlDelete;
-template<class T> class WsjcppSqlWhere;
+class SqlQuery;
+class SqlInsert;
+class SqlUpdate;
+class SqlSelect;
+class SqlDelete;
+template<class T> class SqlWhere;
 
-class IWsjcppSqlBuilder {
+class ISqlBuilder {
 public:
 
   virtual bool hasErrors() = 0;
   virtual std::string sql() = 0;
-  virtual void setDatabaseType(WsjcppSqlBuilderForDatabase dbType) = 0;
-  virtual WsjcppSqlBuilderForDatabase databaseType() = 0;
+  virtual void setDatabaseType(SqlBuilderForDatabase dbType) = 0;
+  virtual SqlBuilderForDatabase databaseType() = 0;
 
 protected:
-  friend WsjcppSqlWhere<WsjcppSqlInsert>;
-  friend WsjcppSqlWhere<WsjcppSqlUpdate>;
-  friend WsjcppSqlWhere<WsjcppSqlDelete>;
-  friend WsjcppSqlWhere<WsjcppSqlSelect>;
-  friend WsjcppSqlQuery;
+  friend SqlWhere<SqlInsert>;
+  friend SqlWhere<SqlUpdate>;
+  friend SqlWhere<SqlDelete>;
+  friend SqlWhere<SqlSelect>;
+  friend SqlQuery;
   virtual void addError(const std::string &err) = 0;
 };
 
 
 
-class WsjcppSqlQuery {
+class SqlQuery {
 public:
-  WsjcppSqlQuery(WsjcppSqlQueryType sqlType, SqlBuilder *builder, const std::string &tableName);
-  WsjcppSqlQueryType sqlType();
+  SqlQuery(SqlQueryType sqlType, SqlBuilder *builder, const std::string &tableName);
+  SqlQueryType sqlType();
   SqlBuilder &builder();
   SqlBuilder *builderRawPtr();
   const std::string &tableName();
   virtual std::string sql() = 0;
 
 private:
-  WsjcppSqlQueryType m_sqlType;
+  SqlQueryType m_sqlType;
   std::string m_tableName;
   SqlBuilder *m_builder;
 };
 
-class WsjcppSqlWhereBase {
+class SqlWhereBase {
 public:
-  WsjcppSqlWhereBase(WsjcppSqlWhereType type);
-  WsjcppSqlWhereType type();
+  SqlWhereBase(SqlWhereType type);
+  SqlWhereType type();
   virtual std::string sql() = 0;
 
 private:
-  WsjcppSqlWhereType m_type;
+  SqlWhereType m_type;
 };
 
-class WsjcppSqlWhereOr : public WsjcppSqlWhereBase {
+class SqlWhereOr : public SqlWhereBase {
 public:
-  WsjcppSqlWhereOr();
+  SqlWhereOr();
   virtual std::string sql() override;
 };
 
-class WsjcppSqlWhereAnd : public WsjcppSqlWhereBase {
+class SqlWhereAnd : public SqlWhereBase {
 public:
-  WsjcppSqlWhereAnd();
+  SqlWhereAnd();
   virtual std::string sql() override;
 };
 
-class WsjcppSqlWhereCondition : public WsjcppSqlWhereBase {
+class SqlWhereCondition : public SqlWhereBase {
 public:
-  WsjcppSqlWhereCondition(const std::string &name, WsjcppSqlWhereConditionType comparator, const std::string &value);
-  WsjcppSqlWhereCondition(const std::string &name, WsjcppSqlWhereConditionType comparator, int value);
-  WsjcppSqlWhereCondition(const std::string &name, WsjcppSqlWhereConditionType comparator, double value);
-  WsjcppSqlWhereCondition(const std::string &name, WsjcppSqlWhereConditionType comparator, float value);
+  SqlWhereCondition(const std::string &name, SqlWhereConditionType comparator, const std::string &value);
+  SqlWhereCondition(const std::string &name, SqlWhereConditionType comparator, int value);
+  SqlWhereCondition(const std::string &name, SqlWhereConditionType comparator, double value);
+  SqlWhereCondition(const std::string &name, SqlWhereConditionType comparator, float value);
   const std::string &name();
-  WsjcppSqlWhereConditionType comparator();
+  SqlWhereConditionType comparator();
   const std::string &value();
   virtual std::string sql() override;
 private:
   std::string m_name;
   std::string m_value;
-  WsjcppSqlWhereConditionType m_comparator;
+  SqlWhereConditionType m_comparator;
 };
 
-class WsjcppSqlSelect;
+class SqlSelect;
 
 template<class T>
-class WsjcppSqlWhere : public WsjcppSqlWhereBase {
+class SqlWhere : public SqlWhereBase {
 public:
-  WsjcppSqlWhere(WsjcppSqlWhere<T> *parent, SqlBuilder *builder, T *query)
-    : WsjcppSqlWhereBase(WsjcppSqlWhereType::SUB_CONDITION), m_parent(parent), m_builder(builder), m_query(query) { }
+  SqlWhere(SqlWhere<T> *parent, SqlBuilder *builder, T *query)
+    : SqlWhereBase(SqlWhereType::SUB_CONDITION), m_parent(parent), m_builder(builder), m_query(query) { }
 
   template <typename TVal>
-  WsjcppSqlWhere<T> &notEqual(const std::string &name, TVal value) {
-    cond(name, WsjcppSqlWhereConditionType::NOT_EQUAL, value);
-    return *this;
-  }
-
-  template <typename TVal>
-  WsjcppSqlWhere<T> &equal(const std::string &name, TVal value) {
-    cond(name, WsjcppSqlWhereConditionType::EQUAL, value);
+  SqlWhere<T> &notEqual(const std::string &name, TVal value) {
+    cond(name, SqlWhereConditionType::NOT_EQUAL, value);
     return *this;
   }
 
   template <typename TVal>
-  WsjcppSqlWhere<T> &moreThen(const std::string &name, TVal value) {
-    cond(name, WsjcppSqlWhereConditionType::MORE_THEN, value);
+  SqlWhere<T> &equal(const std::string &name, TVal value) {
+    cond(name, SqlWhereConditionType::EQUAL, value);
     return *this;
   }
 
   template <typename TVal>
-  WsjcppSqlWhere<T> &lessThen(const std::string &name, TVal value) {
-    cond(name, WsjcppSqlWhereConditionType::LESS_THEN, value);
+  SqlWhere<T> &moreThen(const std::string &name, TVal value) {
+    cond(name, SqlWhereConditionType::MORE_THEN, value);
     return *this;
   }
 
-  WsjcppSqlWhere<T> &like(const std::string &name, const std::string &value) {
-    cond(name, WsjcppSqlWhereConditionType::LIKE, value);
+  template <typename TVal>
+  SqlWhere<T> &lessThen(const std::string &name, TVal value) {
+    cond(name, SqlWhereConditionType::LESS_THEN, value);
     return *this;
   }
 
-  WsjcppSqlWhere<T> &or_() {
+  SqlWhere<T> &like(const std::string &name, const std::string &value) {
+    cond(name, SqlWhereConditionType::LIKE, value);
+    return *this;
+  }
+
+  SqlWhere<T> &or_() {
     if (
       m_conditions.size() > 0
-      && m_conditions[m_conditions.size()-1]->type() == WsjcppSqlWhereType::LOGICAL_OPERATOR
+      && m_conditions[m_conditions.size()-1]->type() == SqlWhereType::LOGICAL_OPERATOR
     ) {
-      addError("[WARNING] WsjcppSqlWhere. Last item alredy defined as logical_operator. current will be skipped.");
+      addError("[WARNING] SqlWhere. Last item alredy defined as logical_operator. current will be skipped.");
       return *this;
     }
 
-    m_conditions.push_back(std::make_shared<WsjcppSqlWhereOr>());
+    m_conditions.push_back(std::make_shared<SqlWhereOr>());
     return *this;
   }
 
-  WsjcppSqlWhere<T> &and_() {
+  SqlWhere<T> &and_() {
     if (
       m_conditions.size() > 0
-      && m_conditions[m_conditions.size()-1]->type() == WsjcppSqlWhereType::LOGICAL_OPERATOR
+      && m_conditions[m_conditions.size()-1]->type() == SqlWhereType::LOGICAL_OPERATOR
     ) {
-      addError("[WARNING] WsjcppSqlWhere. Last item alredy defined as logical_operator. current will be skipped.");
+      addError("[WARNING] SqlWhere. Last item alredy defined as logical_operator. current will be skipped.");
       return *this;
     }
-    m_conditions.push_back(std::make_shared<WsjcppSqlWhereAnd>());
+    m_conditions.push_back(std::make_shared<SqlWhereAnd>());
     return *this;
   }
 
-  WsjcppSqlWhere<T> &subCondition() {
+  SqlWhere<T> &subCondition() {
     if (
       m_conditions.size() > 0
-      && m_conditions[m_conditions.size()-1]->type() == WsjcppSqlWhereType::CONDITION
+      && m_conditions[m_conditions.size()-1]->type() == SqlWhereType::CONDITION
     ) {
         and_(); // default add and_
     }
-    auto sub_cond = std::make_shared<WsjcppSqlWhere<T>>(this, m_builder, m_query);
+    auto sub_cond = std::make_shared<SqlWhere<T>>(this, m_builder, m_query);
     m_conditions.push_back(sub_cond);
     return *(sub_cond.get());
   }
 
-  WsjcppSqlWhere<T> &finishSubCondition() {
+  SqlWhere<T> &finishSubCondition() {
     // TODO return parent
     if (m_parent != nullptr) {
       return *m_parent;
@@ -235,7 +235,7 @@ public:
   virtual std::string sql() override {
     std::string ret = "";
     for (auto item : m_conditions) {
-      if (item->type() == WsjcppSqlWhereType::SUB_CONDITION) {
+      if (item->type() == SqlWhereType::SUB_CONDITION) {
         ret += "(" + item->sql() + ")";
       } else {
         ret += item->sql();
@@ -246,55 +246,55 @@ public:
 
 private:
   template <typename TVal>
-  WsjcppSqlWhere<T> &cond(const std::string &name, WsjcppSqlWhereConditionType comparator, TVal value) {
+  SqlWhere<T> &cond(const std::string &name, SqlWhereConditionType comparator, TVal value) {
     if (
       m_conditions.size() > 0
-      && m_conditions[m_conditions.size()-1]->type() == WsjcppSqlWhereType::CONDITION
+      && m_conditions[m_conditions.size()-1]->type() == SqlWhereType::CONDITION
     ) {
         and_(); // default add and_
     }
-    m_conditions.push_back(std::make_shared<WsjcppSqlWhereCondition>(name, comparator, value));
+    m_conditions.push_back(std::make_shared<SqlWhereCondition>(name, comparator, value));
     return *this;
   }
 
   void addError(const std::string &err) {
-    ((IWsjcppSqlBuilder *)m_builder)->addError(err);
+    ((ISqlBuilder *)m_builder)->addError(err);
   }
 
   SqlBuilder *m_builder;
   T *m_query;
-  WsjcppSqlWhere<T> *m_parent;
-  std::vector<std::shared_ptr<WsjcppSqlWhereBase>> m_conditions;
+  SqlWhere<T> *m_parent;
+  std::vector<std::shared_ptr<SqlWhereBase>> m_conditions;
 };
 
-class WsjcppSqlSelect : public WsjcppSqlQuery {
+class SqlSelect : public SqlQuery {
 public:
-  WsjcppSqlSelect(const std::string &tableName, SqlBuilder *builder);
-  WsjcppSqlSelect &colum(const std::string &col, const std::string &col_as = "");
+  SqlSelect(const std::string &tableName, SqlBuilder *builder);
+  SqlSelect &colum(const std::string &col, const std::string &col_as = "");
 
-  WsjcppSqlWhere<WsjcppSqlSelect> &where();
+  SqlWhere<SqlSelect> &where();
   // TODO group by
   // TODO order by
   virtual std::string sql() override;
 
 private:
-  std::shared_ptr<WsjcppSqlWhere<WsjcppSqlSelect>> m_where;
+  std::shared_ptr<SqlWhere<SqlSelect>> m_where;
   std::vector<std::string> m_columns;
   std::map<std::string, std::string> m_columns_as;
 };
 
 
-class WsjcppSqlInsert : public WsjcppSqlQuery {
+class SqlInsert : public SqlQuery {
 public:
-  WsjcppSqlInsert(const std::string &tableName, SqlBuilder *builder);
-  WsjcppSqlInsert &colum(const std::string &col);
-  WsjcppSqlInsert &addColums(const std::vector<std::string> &cols);
-  WsjcppSqlInsert &clearValues();
+  SqlInsert(const std::string &tableName, SqlBuilder *builder);
+  SqlInsert &colum(const std::string &col);
+  SqlInsert &addColums(const std::vector<std::string> &cols);
+  SqlInsert &clearValues();
 
-  WsjcppSqlInsert &val(const std::string &val);
-  WsjcppSqlInsert &val(int val);
-  WsjcppSqlInsert &val(float val);
-  WsjcppSqlInsert &val(double val);
+  SqlInsert &val(const std::string &val);
+  SqlInsert &val(int val);
+  SqlInsert &val(float val);
+  SqlInsert &val(double val);
 
   virtual std::string sql() override;
 
@@ -303,69 +303,69 @@ private:
   std::vector<std::string> m_values;
 };
 
-class WsjcppSqlUpdate : public WsjcppSqlQuery {
+class SqlUpdate : public SqlQuery {
 public:
-  WsjcppSqlUpdate(const std::string &tableName, SqlBuilder *builder);
+  SqlUpdate(const std::string &tableName, SqlBuilder *builder);
 
-  WsjcppSqlUpdate &set(const std::string &name, const std::string &val);
-  WsjcppSqlUpdate &set(const std::string &name, int val);
-  WsjcppSqlUpdate &set(const std::string &name, float val);
-  WsjcppSqlUpdate &set(const std::string &name, double val);
+  SqlUpdate &set(const std::string &name, const std::string &val);
+  SqlUpdate &set(const std::string &name, int val);
+  SqlUpdate &set(const std::string &name, float val);
+  SqlUpdate &set(const std::string &name, double val);
 
-  WsjcppSqlWhere<WsjcppSqlUpdate> &where();
+  SqlWhere<SqlUpdate> &where();
 
   virtual std::string sql() override;
 
 private:
-  WsjcppSqlUpdate &setValue(const std::string &name, const std::string &val);
+  SqlUpdate &setValue(const std::string &name, const std::string &val);
 
-  std::shared_ptr<WsjcppSqlWhere<WsjcppSqlUpdate>> m_where;
+  std::shared_ptr<SqlWhere<SqlUpdate>> m_where;
   std::vector<std::string> m_columns;
   std::map<std::string, std::string> m_values;
 };
 
-class WsjcppSqlDelete : public WsjcppSqlQuery {
+class SqlDelete : public SqlQuery {
 public:
-  WsjcppSqlDelete(const std::string &tableName, SqlBuilder *builder);
-  WsjcppSqlWhere<WsjcppSqlDelete> &where();
+  SqlDelete(const std::string &tableName, SqlBuilder *builder);
+  SqlWhere<SqlDelete> &where();
   virtual std::string sql() override;
 private:
-  std::shared_ptr<WsjcppSqlWhere<WsjcppSqlDelete>> m_where;
+  std::shared_ptr<SqlWhere<SqlDelete>> m_where;
 };
 
-class SqlBuilder : public IWsjcppSqlBuilder {
+class SqlBuilder : public ISqlBuilder {
 public:
-  SqlBuilder(WsjcppSqlBuilderForDatabase dbType = WsjcppSqlBuilderForDatabase::SQLITE3);
+  SqlBuilder(SqlBuilderForDatabase dbType = SqlBuilderForDatabase::SQLITE3);
   
   // TODO begin / end transaction can be added here
 
-  WsjcppSqlSelect &selectFrom(const std::string &tableName);
-  WsjcppSqlInsert &insertInto(const std::string &tableName);
-  WsjcppSqlInsert &findInsertOrCreate(const std::string &tableName);
-  WsjcppSqlUpdate &update(const std::string &tableName);
-  WsjcppSqlUpdate &findUpdateOrCreate(const std::string &tableName);
-  WsjcppSqlDelete &deleteFrom(const std::string &sSqlTable);
-  WsjcppSqlDelete &findDeleteOrCreate(const std::string &tableName);
+  SqlSelect &selectFrom(const std::string &tableName);
+  SqlInsert &insertInto(const std::string &tableName);
+  SqlInsert &findInsertOrCreate(const std::string &tableName);
+  SqlUpdate &update(const std::string &tableName);
+  SqlUpdate &findUpdateOrCreate(const std::string &tableName);
+  SqlDelete &deleteFrom(const std::string &sSqlTable);
+  SqlDelete &findDeleteOrCreate(const std::string &tableName);
 
   void clear();
 
   virtual bool hasErrors() override;
   virtual std::string sql() override;
 
-  virtual void setDatabaseType(WsjcppSqlBuilderForDatabase dbType) override;
-  virtual WsjcppSqlBuilderForDatabase databaseType() override;
+  virtual void setDatabaseType(SqlBuilderForDatabase dbType) override;
+  virtual SqlBuilderForDatabase databaseType() override;
 
 protected:
-  friend WsjcppSqlSelect;
-  friend WsjcppSqlInsert;
-  friend WsjcppSqlUpdate;
-  friend WsjcppSqlWhere<WsjcppSqlSelect>;
+  friend SqlSelect;
+  friend SqlInsert;
+  friend SqlUpdate;
+  friend SqlWhere<SqlSelect>;
   virtual void addError(const std::string &err) override;
 
 private:
   std::vector<std::string> m_errors;
-  std::vector<std::shared_ptr<WsjcppSqlQuery>> m_queries;
-  WsjcppSqlBuilderForDatabase m_dbType;
+  std::vector<std::shared_ptr<SqlQuery>> m_queries;
+  SqlBuilderForDatabase m_dbType;
 };
 
 } // namespace wsjcpp

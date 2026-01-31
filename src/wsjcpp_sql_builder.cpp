@@ -32,9 +32,9 @@
 namespace wsjcpp {
 
 // ---------------------------------------------------------------------
-// WsjcppSqlBuilderHelpers
+// SqlBuilderHelpers
 
-std::string WsjcppSqlBuilderHelpers::escapingStringValue(const std::string &sValue) {
+std::string SqlBuilderHelpers::escapingStringValue(const std::string &sValue) {
   // escaping simbols NUL (ASCII 0), \n, \r, \, ', ", и Control-Z.
   std::string sResult;
   sResult.reserve(sValue.size() * 2);
@@ -65,115 +65,115 @@ std::string WsjcppSqlBuilderHelpers::escapingStringValue(const std::string &sVal
 }
 
 
-WsjcppSqlQuery::WsjcppSqlQuery(WsjcppSqlQueryType sqlType, SqlBuilder *builder, const std::string &tableName)
+SqlQuery::SqlQuery(SqlQueryType sqlType, SqlBuilder *builder, const std::string &tableName)
   : m_sqlType(sqlType), m_builder(builder), m_tableName(tableName) {
 
 }
 
-WsjcppSqlQueryType WsjcppSqlQuery::sqlType() {
+SqlQueryType SqlQuery::sqlType() {
   return m_sqlType;
 }
 
-SqlBuilder &WsjcppSqlQuery::builder() {
+SqlBuilder &SqlQuery::builder() {
   return *m_builder;
 }
 
-SqlBuilder *WsjcppSqlQuery::builderRawPtr() {
+SqlBuilder *SqlQuery::builderRawPtr() {
   return m_builder;
 }
 
-const std::string &WsjcppSqlQuery::tableName() {
+const std::string &SqlQuery::tableName() {
   return m_tableName;
 }
 
 // ---------------------------------------------------------------------
-// WsjcppSqlWhereBase
+// SqlWhereBase
 
-WsjcppSqlWhereBase::WsjcppSqlWhereBase(WsjcppSqlWhereType type) : m_type(type) {
+SqlWhereBase::SqlWhereBase(SqlWhereType type) : m_type(type) {
 
 };
 
-WsjcppSqlWhereType WsjcppSqlWhereBase::type() {
+SqlWhereType SqlWhereBase::type() {
   return m_type;
 }
 
 // ---------------------------------------------------------------------
-// WsjcppSqlWhereOr
+// SqlWhereOr
 
-WsjcppSqlWhereOr::WsjcppSqlWhereOr() : WsjcppSqlWhereBase(WsjcppSqlWhereType::LOGICAL_OPERATOR) { }
-std::string WsjcppSqlWhereOr::sql() { return " OR "; };
-
-// ---------------------------------------------------------------------
-// WsjcppSqlWhereAnd
-
-WsjcppSqlWhereAnd::WsjcppSqlWhereAnd() : WsjcppSqlWhereBase(WsjcppSqlWhereType::LOGICAL_OPERATOR) { }
-std::string WsjcppSqlWhereAnd::sql() { return " AND "; };
+SqlWhereOr::SqlWhereOr() : SqlWhereBase(SqlWhereType::LOGICAL_OPERATOR) { }
+std::string SqlWhereOr::sql() { return " OR "; };
 
 // ---------------------------------------------------------------------
-// WsjcppSqlWhereCondition
+// SqlWhereAnd
 
-WsjcppSqlWhereCondition::WsjcppSqlWhereCondition(
+SqlWhereAnd::SqlWhereAnd() : SqlWhereBase(SqlWhereType::LOGICAL_OPERATOR) { }
+std::string SqlWhereAnd::sql() { return " AND "; };
+
+// ---------------------------------------------------------------------
+// SqlWhereCondition
+
+SqlWhereCondition::SqlWhereCondition(
   const std::string &name,
-  WsjcppSqlWhereConditionType comparator,
+  SqlWhereConditionType comparator,
   const std::string &value
-) : WsjcppSqlWhereBase(WsjcppSqlWhereType::CONDITION), m_name(name), m_comparator(comparator) {
+) : SqlWhereBase(SqlWhereType::CONDITION), m_name(name), m_comparator(comparator) {
   // TODO in different databases different quotes, mssql have a column names in double quotes
-  m_value = WsjcppSqlBuilderHelpers::escapingStringValue(value);
+  m_value = SqlBuilderHelpers::escapingStringValue(value);
 }
 
-WsjcppSqlWhereCondition::WsjcppSqlWhereCondition(
+SqlWhereCondition::SqlWhereCondition(
   const std::string &name,
-  WsjcppSqlWhereConditionType comparator,
+  SqlWhereConditionType comparator,
   int value
-) : WsjcppSqlWhereBase(WsjcppSqlWhereType::CONDITION), m_name(name), m_comparator(comparator) {
+) : SqlWhereBase(SqlWhereType::CONDITION), m_name(name), m_comparator(comparator) {
   m_value = std::to_string(value);
 }
 
-WsjcppSqlWhereCondition::WsjcppSqlWhereCondition(
+SqlWhereCondition::SqlWhereCondition(
   const std::string &name,
-  WsjcppSqlWhereConditionType comparator,
+  SqlWhereConditionType comparator,
   double value
-) : WsjcppSqlWhereBase(WsjcppSqlWhereType::CONDITION), m_name(name), m_comparator(comparator) {
+) : SqlWhereBase(SqlWhereType::CONDITION), m_name(name), m_comparator(comparator) {
   m_value = std::to_string(value);
 }
 
-WsjcppSqlWhereCondition::WsjcppSqlWhereCondition(
+SqlWhereCondition::SqlWhereCondition(
   const std::string &name,
-  WsjcppSqlWhereConditionType comparator,
+  SqlWhereConditionType comparator,
   float value
-) : WsjcppSqlWhereBase(WsjcppSqlWhereType::CONDITION), m_name(name), m_comparator(comparator) {
+) : SqlWhereBase(SqlWhereType::CONDITION), m_name(name), m_comparator(comparator) {
   m_value = std::to_string(value);
 }
 
-const std::string &WsjcppSqlWhereCondition::name() {
+const std::string &SqlWhereCondition::name() {
   return m_name;
 }
 
-WsjcppSqlWhereConditionType WsjcppSqlWhereCondition::comparator() {
+SqlWhereConditionType SqlWhereCondition::comparator() {
   return m_comparator;
 }
 
-const std::string &WsjcppSqlWhereCondition::value() {
+const std::string &SqlWhereCondition::value() {
   return m_value;
 }
 
-std::string WsjcppSqlWhereCondition::sql() {
+std::string SqlWhereCondition::sql() {
   std::string ret;
   ret += m_name; // TODO validate and escaping
   switch (m_comparator) {
-    case WsjcppSqlWhereConditionType::NOT_EQUAL:
+    case SqlWhereConditionType::NOT_EQUAL:
       ret += " <> ";
       break;
-    case WsjcppSqlWhereConditionType::EQUAL:
+    case SqlWhereConditionType::EQUAL:
       ret += " = ";
       break;
-    case WsjcppSqlWhereConditionType::MORE_THEN:
+    case SqlWhereConditionType::MORE_THEN:
       ret += " > ";
       break;
-    case WsjcppSqlWhereConditionType::LESS_THEN:
+    case SqlWhereConditionType::LESS_THEN:
       ret += " < ";
       break;
-    case WsjcppSqlWhereConditionType::LIKE:
+    case SqlWhereConditionType::LIKE:
       ret += " LIKE ";
       break;
     default:
@@ -185,14 +185,14 @@ std::string WsjcppSqlWhereCondition::sql() {
 }
 
 // ---------------------------------------------------------------------
-// WsjcppSqlSelect
+// SqlSelect
 
-WsjcppSqlSelect::WsjcppSqlSelect(const std::string &tableName, SqlBuilder *builder)
-: WsjcppSqlQuery(WsjcppSqlQueryType::SELECT, builder, tableName) {
+SqlSelect::SqlSelect(const std::string &tableName, SqlBuilder *builder)
+: SqlQuery(SqlQueryType::SELECT, builder, tableName) {
   // TODO multitype table names with AS
 }
 
-WsjcppSqlSelect &WsjcppSqlSelect::colum(const std::string &col, const std::string &col_as) {
+SqlSelect &SqlSelect::colum(const std::string &col, const std::string &col_as) {
   auto it = std::find(m_columns.begin(), m_columns.end(), col);
   if (it != m_columns.end()) {
     builder().addError("Column '" + col + "' already added to select");
@@ -203,14 +203,14 @@ WsjcppSqlSelect &WsjcppSqlSelect::colum(const std::string &col, const std::strin
   return *this;
 }
 
-WsjcppSqlWhere<WsjcppSqlSelect> &WsjcppSqlSelect::where() {
+SqlWhere<SqlSelect> &SqlSelect::where() {
   if (!m_where) {
-    m_where = std::make_shared<WsjcppSqlWhere<WsjcppSqlSelect>>(nullptr, builderRawPtr(), this);
+    m_where = std::make_shared<SqlWhere<SqlSelect>>(nullptr, builderRawPtr(), this);
   }
   return *(m_where.get());
 }
 
-std::string WsjcppSqlSelect::sql() {
+std::string SqlSelect::sql() {
   std::string ret = "SELECT ";
   // TODO TOP OR LIMIT for different databases
 
@@ -242,51 +242,51 @@ std::string WsjcppSqlSelect::sql() {
 }
 
 // ---------------------------------------------------------------------
-// WsjcppSqlInsert
+// SqlInsert
 
-WsjcppSqlInsert::WsjcppSqlInsert(const std::string &tableName, SqlBuilder *builder)
-: WsjcppSqlQuery(WsjcppSqlQueryType::INSERT, builder, tableName) {
+SqlInsert::SqlInsert(const std::string &tableName, SqlBuilder *builder)
+: SqlQuery(SqlQueryType::INSERT, builder, tableName) {
 
 }
 
-WsjcppSqlInsert &WsjcppSqlInsert::colum(const std::string &col) {
+SqlInsert &SqlInsert::colum(const std::string &col) {
   m_columns.push_back(col);
   return *this;
 }
 
-WsjcppSqlInsert &WsjcppSqlInsert::addColums(const std::vector<std::string> &cols) {
+SqlInsert &SqlInsert::addColums(const std::vector<std::string> &cols) {
   for (auto col : cols) {
     m_columns.push_back(col);
   }
   return *this;
 }
 
-WsjcppSqlInsert &WsjcppSqlInsert::clearValues() {
+SqlInsert &SqlInsert::clearValues() {
   m_values.clear();
   return *this;
 }
 
-WsjcppSqlInsert &WsjcppSqlInsert::val(const std::string &val) {
-  m_values.push_back(WsjcppSqlBuilderHelpers::escapingStringValue(val));
+SqlInsert &SqlInsert::val(const std::string &val) {
+  m_values.push_back(SqlBuilderHelpers::escapingStringValue(val));
   return *this;
 }
 
-WsjcppSqlInsert &WsjcppSqlInsert::val(int val) {
+SqlInsert &SqlInsert::val(int val) {
   m_values.push_back(std::to_string(val));
   return *this;
 }
 
-WsjcppSqlInsert &WsjcppSqlInsert::val(float val) {
+SqlInsert &SqlInsert::val(float val) {
   m_values.push_back(std::to_string(val));
   return *this;
 }
 
-WsjcppSqlInsert &WsjcppSqlInsert::val(double val) {
+SqlInsert &SqlInsert::val(double val) {
   m_values.push_back(std::to_string(val));
   return *this;
 }
 
-std::string WsjcppSqlInsert::sql() {
+std::string SqlInsert::sql() {
   std::string ret = "INSERT INTO " + tableName();
 
   // TODO if columns is empty
@@ -316,30 +316,30 @@ std::string WsjcppSqlInsert::sql() {
 };
 
 // ---------------------------------------------------------------------
-// WsjcppSqlUpdate
+// SqlUpdate
 
-WsjcppSqlUpdate::WsjcppSqlUpdate(const std::string &tableName, SqlBuilder *builder)
-  : WsjcppSqlQuery(WsjcppSqlQueryType::UPDATE, builder, tableName) {
+SqlUpdate::SqlUpdate(const std::string &tableName, SqlBuilder *builder)
+  : SqlQuery(SqlQueryType::UPDATE, builder, tableName) {
 
 }
 
-WsjcppSqlUpdate &WsjcppSqlUpdate::set(const std::string &name, const std::string &val) {
-  return setValue(name, WsjcppSqlBuilderHelpers::escapingStringValue(val));
+SqlUpdate &SqlUpdate::set(const std::string &name, const std::string &val) {
+  return setValue(name, SqlBuilderHelpers::escapingStringValue(val));
 }
 
-WsjcppSqlUpdate &WsjcppSqlUpdate::set(const std::string &name, int val) {
+SqlUpdate &SqlUpdate::set(const std::string &name, int val) {
   return setValue(name, std::to_string(val));
 }
 
-WsjcppSqlUpdate &WsjcppSqlUpdate::set(const std::string &name, float val) {
+SqlUpdate &SqlUpdate::set(const std::string &name, float val) {
   return setValue(name, std::to_string(val));
 }
 
-WsjcppSqlUpdate &WsjcppSqlUpdate::set(const std::string &name, double val) {
+SqlUpdate &SqlUpdate::set(const std::string &name, double val) {
   return setValue(name, std::to_string(val));
 }
 
-WsjcppSqlUpdate &WsjcppSqlUpdate::setValue(const std::string &name, const std::string &val) {
+SqlUpdate &SqlUpdate::setValue(const std::string &name, const std::string &val) {
   auto it = std::find(m_columns.begin(), m_columns.end(), name);
   if (it != m_columns.end()) {
     m_values[name] = val;
@@ -351,14 +351,14 @@ WsjcppSqlUpdate &WsjcppSqlUpdate::setValue(const std::string &name, const std::s
   return *this;
 }
 
-WsjcppSqlWhere<WsjcppSqlUpdate> &WsjcppSqlUpdate::where() {
+SqlWhere<SqlUpdate> &SqlUpdate::where() {
   if (!m_where) {
-    m_where = std::make_shared<WsjcppSqlWhere<WsjcppSqlUpdate>>(nullptr, builderRawPtr(), this);
+    m_where = std::make_shared<SqlWhere<SqlUpdate>>(nullptr, builderRawPtr(), this);
   }
   return *(m_where.get());
 }
 
-std::string WsjcppSqlUpdate::sql() {
+std::string SqlUpdate::sql() {
   std::string ret = "UPDATE " + tableName() + " SET ";
 
   // TODO if columns is empty
@@ -380,21 +380,21 @@ std::string WsjcppSqlUpdate::sql() {
 
 
 // ---------------------------------------------------------------------
-// WsjcppSqlDelete
+// SqlDelete
 
-WsjcppSqlDelete::WsjcppSqlDelete(const std::string &tableName, SqlBuilder *builder)
-  : WsjcppSqlQuery(WsjcppSqlQueryType::DELETE, builder, tableName) {
+SqlDelete::SqlDelete(const std::string &tableName, SqlBuilder *builder)
+  : SqlQuery(SqlQueryType::DELETE, builder, tableName) {
 
 }
 
-WsjcppSqlWhere<WsjcppSqlDelete> &WsjcppSqlDelete::where() {
+SqlWhere<SqlDelete> &SqlDelete::where() {
   if (!m_where) {
-    m_where = std::make_shared<WsjcppSqlWhere<WsjcppSqlDelete>>(nullptr, builderRawPtr(), this);
+    m_where = std::make_shared<SqlWhere<SqlDelete>>(nullptr, builderRawPtr(), this);
   }
   return *(m_where.get());
 }
 
-std::string WsjcppSqlDelete::sql() {
+std::string SqlDelete::sql() {
   std::string ret = "DELETE FROM " + tableName();
 
   if (m_where) {
@@ -407,53 +407,53 @@ std::string WsjcppSqlDelete::sql() {
 // ---------------------------------------------------------------------
 // SqlBuilder
 
-SqlBuilder::SqlBuilder(WsjcppSqlBuilderForDatabase dbType) : m_dbType(dbType) {
+SqlBuilder::SqlBuilder(SqlBuilderForDatabase dbType) : m_dbType(dbType) {
 
 }
 
-WsjcppSqlSelect &SqlBuilder::selectFrom(const std::string &tableName) {
-  m_queries.push_back(std::make_shared<WsjcppSqlSelect>(tableName, this));
+SqlSelect &SqlBuilder::selectFrom(const std::string &tableName) {
+  m_queries.push_back(std::make_shared<SqlSelect>(tableName, this));
   // TODO check must be select last one;
-  return *(WsjcppSqlSelect *)(m_queries[m_queries.size() -1].get());
+  return *(SqlSelect *)(m_queries[m_queries.size() -1].get());
 }
 
-WsjcppSqlInsert &SqlBuilder::insertInto(const std::string &tableName) {
-  m_queries.push_back(std::make_shared<WsjcppSqlInsert>(tableName, this));
-  return *(WsjcppSqlInsert *)(m_queries[m_queries.size() -1].get());
+SqlInsert &SqlBuilder::insertInto(const std::string &tableName) {
+  m_queries.push_back(std::make_shared<SqlInsert>(tableName, this));
+  return *(SqlInsert *)(m_queries[m_queries.size() -1].get());
 }
 
-WsjcppSqlInsert &SqlBuilder::findInsertOrCreate(const std::string &tableName) {
+SqlInsert &SqlBuilder::findInsertOrCreate(const std::string &tableName) {
   for (auto query : m_queries) {
-    if (query->sqlType() == WsjcppSqlQueryType::INSERT && query->tableName() == tableName) {
-      return *(WsjcppSqlInsert *)(query.get());
+    if (query->sqlType() == SqlQueryType::INSERT && query->tableName() == tableName) {
+      return *(SqlInsert *)(query.get());
     }
   }
   return insertInto(tableName);
 }
 
-WsjcppSqlUpdate &SqlBuilder::update(const std::string &tableName) {
-  m_queries.push_back(std::make_shared<WsjcppSqlUpdate>(tableName, this));
-  return *(WsjcppSqlUpdate *)(m_queries[m_queries.size() -1].get());
+SqlUpdate &SqlBuilder::update(const std::string &tableName) {
+  m_queries.push_back(std::make_shared<SqlUpdate>(tableName, this));
+  return *(SqlUpdate *)(m_queries[m_queries.size() -1].get());
 }
 
-WsjcppSqlUpdate &SqlBuilder::findUpdateOrCreate(const std::string &tableName) {
+SqlUpdate &SqlBuilder::findUpdateOrCreate(const std::string &tableName) {
   for (auto query : m_queries) {
-    if (query->sqlType() == WsjcppSqlQueryType::UPDATE && query->tableName() == tableName) {
-      return *(WsjcppSqlUpdate *)(query.get());
+    if (query->sqlType() == SqlQueryType::UPDATE && query->tableName() == tableName) {
+      return *(SqlUpdate *)(query.get());
     }
   }
   return update(tableName);
 }
 
-WsjcppSqlDelete &SqlBuilder::deleteFrom(const std::string &tableName) {
-  m_queries.push_back(std::make_shared<WsjcppSqlDelete>(tableName, this));
-  return *(WsjcppSqlDelete *)(m_queries[m_queries.size() -1].get());
+SqlDelete &SqlBuilder::deleteFrom(const std::string &tableName) {
+  m_queries.push_back(std::make_shared<SqlDelete>(tableName, this));
+  return *(SqlDelete *)(m_queries[m_queries.size() -1].get());
 }
 
-WsjcppSqlDelete &SqlBuilder::findDeleteOrCreate(const std::string &tableName) {
+SqlDelete &SqlBuilder::findDeleteOrCreate(const std::string &tableName) {
   for (auto query : m_queries) {
-    if (query->sqlType() == WsjcppSqlQueryType::DELETE && query->tableName() == tableName) {
-      return *(WsjcppSqlDelete *)(query.get());
+    if (query->sqlType() == SqlQueryType::DELETE && query->tableName() == tableName) {
+      return *(SqlDelete *)(query.get());
     }
   }
   return deleteFrom(tableName);
@@ -483,11 +483,11 @@ std::string SqlBuilder::sql() {
 }
 
 
-void SqlBuilder::setDatabaseType(WsjcppSqlBuilderForDatabase dbType) {
+void SqlBuilder::setDatabaseType(SqlBuilderForDatabase dbType) {
   m_dbType = dbType;
 }
 
-WsjcppSqlBuilderForDatabase SqlBuilder::databaseType() {
+SqlBuilderForDatabase SqlBuilder::databaseType() {
   return m_dbType;
 }
 
