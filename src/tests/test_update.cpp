@@ -30,12 +30,22 @@
 
 int main() {
   wsjcpp::SqlBuilder builder;
-  builder.insertInto("table2")
-    .colum("col1")
-    .addColums({"col2", "col3"})
-    .val("val1")
-    .val(1)
-    .val(2.0)
+  builder.update("table3")
+    .set("col1", "val uuu")
+    .set("col2", 1)
+    .set("col3", 1.000)
+    .where()
+      .equal("col1", "1")
+      .or_()
+      .notEqual("col2", "2")
+      .or_()
+      .subCondition()
+        .equal("c3", "4")
+        // .and_() // be default must be added and
+        .equal("col2", "5")
+      .finishSubCondition()
+      .or_()
+      .lessThen("col4", 111)
   ;
 
   if (builder.hasErrors()) {
@@ -43,26 +53,7 @@ int main() {
     return -1;
   }
   std::string sqlQuery = builder.sql();
-  std::string sqlQueryExpected = "INSERT INTO table2(col1, col2, col3) VALUES('val1', 1, 2.000000)";
-  if (sqlQuery != sqlQueryExpected) {
-    std::cerr
-      << "Expected:" << std::endl
-      << "   {" << sqlQueryExpected << "}" << std::endl
-      << ", but got:" << std::endl
-      << "   {" << sqlQuery << "}" << std::endl
-    ;
-    return -1;
-  }
-
-  builder.findInsertOrCreate("table2")
-    .clearValues()
-    .val("val2")
-    .val(2)
-    .val(10.0)
-  ;
-
-  sqlQuery = builder.sql();
-  sqlQueryExpected = "INSERT INTO table2(col1, col2, col3) VALUES('val2', 2, 10.000000)";
+  std::string sqlQueryExpected = "UPDATE table3 SET col1 = 'val uuu', col2 = 1, col3 = 1.000000 WHERE col1 = '1' OR col2 <> '2' OR (c3 = '4' AND col2 = '5') OR col4 < 111";
   if (sqlQuery != sqlQueryExpected) {
     std::cerr
       << "Expected:" << std::endl

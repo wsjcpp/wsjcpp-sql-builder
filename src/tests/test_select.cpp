@@ -30,45 +30,50 @@
 
 int main() {
   wsjcpp::SqlBuilder builder;
-  builder.insertInto("table2")
+  builder.selectFrom("table1")
     .colum("col1")
-    .addColums({"col2", "col3"})
-    .val("val1")
-    .val(1)
-    .val(2.0)
+    .colum("col2", "c3")
+    .colum("col3")
+    .colum("col4")
+    .where()
+      .equal("col1", "1")
+      .or_()
+      .notEqual("col2", "2")
+      .or_()
+      .subCondition()
+        .equal("c3", "4")
+        // .and_() // be default must be added and
+        .equal("col2", "5")
+      .finishSubCondition()
+      .or_()
+      .lessThen("col4", 111)
+    .endWhere() // need only for groupBy havingBy and etc
   ;
-
   if (builder.hasErrors()) {
     std::cerr << "Select builder has some errors" << std::endl;
     return -1;
   }
   std::string sqlQuery = builder.sql();
-  std::string sqlQueryExpected = "INSERT INTO table2(col1, col2, col3) VALUES('val1', 1, 2.000000)";
+  std::string sqlQueryExpected =
+    "SELECT col1, col2 AS c3, col3, col4 "
+    "FROM table1 "
+    "WHERE col1 = '1' OR col2 <> '2' OR (c3 = '4' AND col2 = '5') OR col4 < 111";
   if (sqlQuery != sqlQueryExpected) {
     std::cerr
       << "Expected:" << std::endl
-      << "   {" << sqlQueryExpected << "}" << std::endl
+      << "   " << sqlQueryExpected << std::endl
       << ", but got:" << std::endl
-      << "   {" << sqlQuery << "}" << std::endl
+      << "   " << sqlQuery << std::endl
     ;
     return -1;
   }
 
-  builder.findInsertOrCreate("table2")
-    .clearValues()
-    .val("val2")
-    .val(2)
-    .val(10.0)
-  ;
-
+  builder.clear();
   sqlQuery = builder.sql();
-  sqlQueryExpected = "INSERT INTO table2(col1, col2, col3) VALUES('val2', 2, 10.000000)";
-  if (sqlQuery != sqlQueryExpected) {
+  if (sqlQuery != "") {
     std::cerr
-      << "Expected:" << std::endl
-      << "   {" << sqlQueryExpected << "}" << std::endl
-      << ", but got:" << std::endl
-      << "   {" << sqlQuery << "}" << std::endl
+      << "Expected empty, but got: " << std::endl
+      << "   " << sqlQuery << std::endl
     ;
     return -1;
   }
