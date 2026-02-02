@@ -132,6 +132,7 @@ class SqlWhereCondition : public SqlWhereBase {
 public:
   SqlWhereCondition(const std::string &name, SqlWhereConditionType comparator, const std::string &value);
   SqlWhereCondition(const std::string &name, SqlWhereConditionType comparator, int value);
+  SqlWhereCondition(const std::string &name, SqlWhereConditionType comparator, long value);
   SqlWhereCondition(const std::string &name, SqlWhereConditionType comparator, double value);
   SqlWhereCondition(const std::string &name, SqlWhereConditionType comparator, float value);
   const std::string &name();
@@ -293,6 +294,7 @@ public:
 
   SqlInsert &val(const std::string &val);
   SqlInsert &val(int val);
+  SqlInsert &val(long val);
   SqlInsert &val(float val);
   SqlInsert &val(double val);
 
@@ -309,6 +311,7 @@ public:
 
   SqlUpdate &set(const std::string &name, const std::string &val);
   SqlUpdate &set(const std::string &name, int val);
+  SqlUpdate &set(const std::string &name, long val);
   SqlUpdate &set(const std::string &name, float val);
   SqlUpdate &set(const std::string &name, double val);
 

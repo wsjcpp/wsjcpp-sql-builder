@@ -132,6 +132,14 @@ SqlWhereCondition::SqlWhereCondition(
 SqlWhereCondition::SqlWhereCondition(
   const std::string &name,
   SqlWhereConditionType comparator,
+  long value
+) : SqlWhereBase(SqlWhereType::CONDITION), m_name(name), m_comparator(comparator) {
+  m_value = std::to_string(value);
+}
+
+SqlWhereCondition::SqlWhereCondition(
+  const std::string &name,
+  SqlWhereConditionType comparator,
   double value
 ) : SqlWhereBase(SqlWhereType::CONDITION), m_name(name), m_comparator(comparator) {
   m_value = std::to_string(value);
@@ -276,6 +284,11 @@ SqlInsert &SqlInsert::val(int val) {
   return *this;
 }
 
+SqlInsert &SqlInsert::val(long val) {
+  m_values.push_back(std::to_string(val));
+  return *this;
+}
+
 SqlInsert &SqlInsert::val(float val) {
   m_values.push_back(std::to_string(val));
   return *this;
@@ -328,6 +341,10 @@ SqlUpdate &SqlUpdate::set(const std::string &name, const std::string &val) {
 }
 
 SqlUpdate &SqlUpdate::set(const std::string &name, int val) {
+  return setValue(name, std::to_string(val));
+}
+
+SqlUpdate &SqlUpdate::set(const std::string &name, long val) {
   return setValue(name, std::to_string(val));
 }
 
