@@ -200,7 +200,7 @@ SqlSelect::SqlSelect(const std::string &tableName, SqlBuilder *builder)
   // TODO multitype table names with AS
 }
 
-SqlSelect &SqlSelect::colum(const std::string &col, const std::string &col_as) {
+SqlSelect &SqlSelect::column(const std::string &col, const std::string &col_as) {
   auto it = std::find(m_columns.begin(), m_columns.end(), col);
   if (it != m_columns.end()) {
     builder().addError("Column '" + col + "' already added to select");
@@ -257,12 +257,12 @@ SqlInsert::SqlInsert(const std::string &tableName, SqlBuilder *builder)
 
 }
 
-SqlInsert &SqlInsert::colum(const std::string &col) {
+SqlInsert &SqlInsert::column(const std::string &col) {
   m_columns.push_back(col);
   return *this;
 }
 
-SqlInsert &SqlInsert::addColums(const std::vector<std::string> &cols) {
+SqlInsert &SqlInsert::addColumns(const std::vector<std::string> &cols) {
   for (auto col : cols) {
     m_columns.push_back(col);
   }

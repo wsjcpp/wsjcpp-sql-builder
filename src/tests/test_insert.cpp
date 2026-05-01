@@ -31,8 +31,8 @@
 int main() {
   wsjcpp::SqlBuilder builder;
   builder.insertInto("table2")
-    .colum("col1")
-    .addColums({"col2", "col3"})
+    .column("col1")
+    .addColumns({"col2", "col3"})
     .val("val1")
     .val(1)
     .val(2.0)

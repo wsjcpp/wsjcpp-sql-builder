@@ -271,7 +271,7 @@ private:
 class SqlSelect : public SqlQuery {
 public:
   SqlSelect(const std::string &tableName, SqlBuilder *builder);
-  SqlSelect &colum(const std::string &col, const std::string &col_as = "");
+  SqlSelect &column(const std::string &col, const std::string &col_as = "");
 
   SqlWhere<SqlSelect> &where();
   // TODO group by
@@ -288,8 +288,8 @@ private:
 class SqlInsert : public SqlQuery {
 public:
   SqlInsert(const std::string &tableName, SqlBuilder *builder);
-  SqlInsert &colum(const std::string &col);
-  SqlInsert &addColums(const std::vector<std::string> &cols);
+  SqlInsert &column(const std::string &col);
+  SqlInsert &addColumns(const std::vector<std::string> &cols);
   SqlInsert &clearValues();
 
   SqlInsert &val(const std::string &val);

@@ -25,10 +25,10 @@ Example main func:
 int main(int argc, const char* argv[]) {
   wsjcpp::SqlBuilder builder;
   builder.selectFrom("table1")
-  .colum("col1")
-  .colum("col2", "c3")
-  .colum("col3")
-  .colum("col4")
+  .column("col1")
+  .column("col2", "c3")
+  .column("col3")
+  .column("col4")
   .where()
     .equal("col1", "1")
     .or_()

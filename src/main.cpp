@@ -5,9 +5,9 @@ int main(int argc, const char* argv[]) {
 
     wsjcpp::SqlBuilder builder;
         builder.selectFrom("users")
-        .colum("id")
-        .colum("name")
-        .colum("pass")
+        .column("id")
+        .column("name")
+        .column("pass")
         .where()
             .equal("pass", "64d878e22cd5046d569bf826869034caf5feab24")
     ;
