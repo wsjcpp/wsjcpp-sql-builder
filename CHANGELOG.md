@@ -1,4 +1,8 @@
-# wsjcpp-sql-builder Changelog
+# sea5kg-sql-builder Changelog
+
+## [v0.3.0] - 2026-08-27 (2026 Aug 27)
+
+- Renamed wsjcpp-sql-builder to sea5kg-sql-builder
 
 ## [v0.2.0] - 2026-01-31 (2026 Jan 31)
 

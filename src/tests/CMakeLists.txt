@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 #
-# Official Source Code: https://github.com/wsjcpp/wsjcpp-sql-builder
+# Official Source Code: https://github.com/sea5kg/sea5kg-sql-builder
 
 file(GLOB ALL_TESTS
      "test_*.cpp"
@@ -28,20 +28,20 @@ file(GLOB ALL_TESTS
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY tests)
 
-list (APPEND TEST_YAML_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/../wsjcpp_sql_builder.cpp")
+list (APPEND TEST_YAML_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/../sea5kg_sql_builder.cpp")
 
 foreach(_TEST ${ALL_TESTS})
-    get_filename_component(TESTNAME ${_TEST} NAME_WE)
-    add_executable(${TESTNAME}
+    get_filename_component(TEST_NAME ${_TEST} NAME_WE)
+    add_executable(${TEST_NAME}
         ${_TEST}
         ${TEST_YAML_SOURCES}
     )
-    target_link_libraries(${TESTNAME} -lpthread ${WSJCPP_LIBRARIES})
+    target_link_libraries(${TEST_NAME} -lpthread ${WSJCPP_LIBRARIES})
 
     add_test(
-      NAME ${TESTNAME}
-      COMMAND $<TARGET_FILE:${TESTNAME}>
+      NAME ${TEST_NAME}
+      COMMAND $<TARGET_FILE:${TEST_NAME}>
     )
     message(${CMAKE_CURRENT_BINARY_DIR}/tests)
-    set_target_properties (${TESTNAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY tests)
+    set_target_properties (${TEST_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY tests)
 endforeach()

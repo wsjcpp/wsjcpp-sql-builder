@@ -21,15 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *
- * Official Source Code: https://github.com/wsjcpp/wsjcpp-sql-builder
+ * Official Source Code: https://github.com/sea5kg/sea5kg-sql-builder
  *
  ***********************************************************************************/
 
 #include <iostream>
-#include <wsjcpp_sql_builder.h>
+#include <sea5kg_sql_builder.h>
 
 int main() {
-  wsjcpp::SqlBuilder builder;
+  sea5kg::sql_builder builder;
   builder.selectFrom("table1")
     .column("col1")
     .column("col2", "c3")

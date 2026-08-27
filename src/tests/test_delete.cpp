@@ -21,15 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *
- * Official Source Code: https://github.com/wsjcpp/wsjcpp-sql-builder
+ * Official Source Code: https://github.com/sea5kg/sea5kg-sql-builder
  *
  ***********************************************************************************/
 
 #include <iostream>
-#include <wsjcpp_sql_builder.h>
+#include <sea5kg_sql_builder.h>
 
 int main() {
-  wsjcpp::SqlBuilder builder;
+  sea5kg::sql_builder builder;
+  // clang-format off
   builder.deleteFrom("table4")
     .where()
       .equal("col1", "1")
@@ -44,6 +45,7 @@ int main() {
       .or_()
       .lessThen("col4", 111)
   ;
+  // clang-format on
 
   if (builder.hasErrors()) {
     std::cerr << "Select builder has some errors" << std::endl;

@@ -1,5 +1,5 @@
-name: "wsjcpp-sql-builder"
-version: v0.2.0
+name: "sea5kg-sql-builder"
+version: v0.3.0
 cmake_minimum_required: "3.0"
 cmake_cxx_standard: "17"
 description: "C++ Class-helper for build SQL queries"
@@ -16,19 +16,11 @@ keywords:
   - "sql"
   - "builder"
 
-dependencies:
-  - name: "wsjcpp-core"
-    version: "v0.2.3"
-    url: "https://github.com/wsjcpp/wsjcpp-core:master"
-    origin: "https://github.com/"
-    installation-dir: "./src.wsjcpp/wsjcpp_core"
-    installation-datetime: "Sun, 10 Aug 2025 08:44:32 GMT"
-
 distribution:
-  - source-file: "src/wsjcpp_sql_builder.h"
-    target-file: "wsjcpp_sql_builder.h"
+  - source-file: "src/sea5kg_sql_builder.h"
+    target-file: "sea5kg_sql_builder.h"
     type: "source-code"
-  - source-file: "src/wsjcpp_sql_builder.cpp"
-    target-file: "wsjcpp_sql_builder.cpp"
+  - source-file: "src/sea5kg_sql_builder.cpp"
+    target-file: "sea5kg_sql_builder.cpp"
     type: "source-code"
 

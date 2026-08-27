@@ -21,15 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *
- * Official Source Code: https://github.com/wsjcpp/wsjcpp-sql-builder
+ * Official Source Code: https://github.com/sea5kg/sea5kg-sql-builder
  *
  ***********************************************************************************/
 
 #include <iostream>
-#include <wsjcpp_sql_builder.h>
+#include <sea5kg_sql_builder.h>
 
 int main() {
-  wsjcpp::SqlBuilder builder;
+  sea5kg::sql_builder builder;
+  // clang-format off
   builder.insertInto("table2")
     .column("col1")
     .addColumns({"col2", "col3"})
@@ -37,6 +38,7 @@ int main() {
     .val(1)
     .val(2.0)
   ;
+  // clang-format on
 
   if (builder.hasErrors()) {
     std::cerr << "Select builder has some errors" << std::endl;
@@ -54,12 +56,14 @@ int main() {
     return -1;
   }
 
+  // clang-format off
   builder.findInsertOrCreate("table2")
     .clearValues()
     .val("val2")
     .val(2)
     .val(10.0)
   ;
+  // clang-format on
 
   sqlQuery = builder.sql();
   sqlQueryExpected = "INSERT INTO table2(col1, col2, col3) VALUES('val2', 2, 10.000000)";

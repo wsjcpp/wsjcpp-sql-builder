@@ -21,15 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *
- * Official Source Code: https://github.com/wsjcpp/wsjcpp-sql-builder
+ * Official Source Code: https://github.com/sea5kg/sea5kg-sql-builder
  *
  ***********************************************************************************/
 
 #include <iostream>
-#include <wsjcpp_sql_builder.h>
+#include <sea5kg_sql_builder.h>
 
 int main() {
-  wsjcpp::SqlBuilder builder;
+  sea5kg::sql_builder builder;
+  // clang-format off
   builder.update("table3")
     .set("col1", "val uuu")
     .set("col2", 1)
@@ -47,20 +48,20 @@ int main() {
       .or_()
       .lessThen("col4", 111)
   ;
+  // clang-format on
 
   if (builder.hasErrors()) {
     std::cerr << "Select builder has some errors" << std::endl;
     return -1;
   }
   std::string sqlQuery = builder.sql();
-  std::string sqlQueryExpected = "UPDATE table3 SET col1 = 'val uuu', col2 = 1, col3 = 1.000000 WHERE col1 = '1' OR col2 <> '2' OR (c3 = '4' AND col2 = '5') OR col4 < 111";
+  std::string sqlQueryExpected = "UPDATE table3 SET col1 = 'val uuu', col2 = 1, col3 = 1.000000 WHERE col1 = '1' OR "
+                                 "col2 <> '2' OR (c3 = '4' AND col2 = '5') OR col4 < 111";
   if (sqlQuery != sqlQueryExpected) {
-    std::cerr
-      << "Expected:" << std::endl
-      << "   {" << sqlQueryExpected << "}" << std::endl
-      << ", but got:" << std::endl
-      << "   {" << sqlQuery << "}" << std::endl
-    ;
+    std::cerr << "Expected:" << std::endl
+              << "   {" << sqlQueryExpected << "}" << std::endl
+              << ", but got:" << std::endl
+              << "   {" << sqlQuery << "}" << std::endl;
     return -1;
   }
 
